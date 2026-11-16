@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173c45">
+  <title>Snowline · Mountain forecast</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#forecast">Skip to forecast</a>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Snowline home"><svg width="34" height="30" viewBox="0 0 34 30" fill="none" aria-hidden="true"><path d="M2 25 14 5l7 12 4-7 8 15H2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 14 5 2 4-3" stroke="currentColor" stroke-width="2"/></svg><span>snowline<span class="brand-divider">/</span><span class="brand-caption">mountain intelligence</span></span></a>
+    <div class="header-right"><div class="unit-switch" role="group" aria-label="Measurement units"><button type="button" data-units="us" aria-pressed="true" class="active" title="US units: inches, Fahrenheit and miles per hour">US<small>in · °F</small></button><button type="button" data-units="metric" aria-pressed="false" title="Metric units: centimeters, Celsius and kilometers per hour">Metric<small>cm · °C</small></button></div><span class="local-label"><span class="status-dot"></span>Local research dashboard</span><button class="icon-button" id="export-button" title="Export forecast JSON" aria-label="Export forecast JSON" disabled><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v5h14v-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+  </header>
+  <main>
+    <div class="intro"><div><p class="eyebrow">A closer look at the next storm</p><h1>The mountain, hour by hour.</h1><p class="intro-copy">Fresh weather guidance, trained snowfall models, and the uncertainty between them.</p></div><div class="refresh-controls"><button id="refresh-button" class="primary-button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.4 6.3A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.6 5.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Refresh all</span></button><p class="refresh-note">Weather, radar &amp; HRRR · all four mountains</p></div></div>
+    <div id="job-status" class="job-status" role="status" aria-live="polite" hidden></div>
+    <div id="error-banner" class="notice notice-error" role="alert" hidden></div>
+    <nav id="mountain-list" class="mountain-list" aria-label="Choose mountain"></nav>
+    <section id="forecast" aria-labelledby="mountain-title">
+      <div class="forecast-heading"><div><div class="mountain-location" id="mountain-location">Utah</div><h2 id="mountain-title">Alta</h2><p id="target-label" class="target-label">Loading mountain information…</p></div><div class="freshness"><span id="data-status" class="badge neutral">Connecting</span><p id="updated-at">Checking saved forecasts</p><p id="source-label"></p></div></div>
+      <div id="snapshot-banner" class="notice" hidden></div>
+      <div class="summary-grid">
+        <article class="summary-card"><div class="card-label"><span id="snow-total-label">Next 48 hours</span><span class="tiny-tag">Weather guidance</span></div><p class="metric"><span id="snow-total">—</span><span class="metric-unit" id="snow-total-unit">in</span></p><div class="metric-description">Forecast fresh snowfall</div></article>
+        <article class="summary-card"><div class="card-label" id="model-summary-label">Our model · 48-hour snow</div><p class="metric"><span id="daily-snow-amount">—</span><span class="metric-unit" id="daily-snow-unit">in</span></p><div class="metric-description" id="daily-snow-description">Next complete reporting window</div></article>
+        <article class="summary-card"><div class="card-label">Temperature range<span class="weather-glyph" aria-hidden="true">°</span></div><p class="metric metric-small"><span id="temperature-range">—</span><span class="metric-unit" id="temperature-unit">°F</span></p><div class="metric-description">Across the selected horizon</div></article>
+        <article class="summary-card"><div class="card-label">Peak wind<span class="weather-glyph" aria-hidden="true">↗</span></div><p class="metric"><span id="peak-wind">—</span><span class="metric-unit" id="wind-unit">mph</span></p><div class="metric-description">Forecast sustained wind</div></article>
+      </div>
+      <section class="panel neural-panel" id="neural-panel" aria-labelledby="neural-title">
+        <div class="panel-heading"><div><p class="eyebrow" id="neural-eyebrow" hidden></p><h3 id="neural-title">Forecast window · in</h3></div><span id="neural-status" class="badge neutral">Research</span></div>
+        <p id="neural-subtitle" class="panel-subtitle" hidden></p>
+        <div class="chart-toolbar"><div id="horizon-buttons" class="horizon-buttons" role="group" aria-label="Forecast horizon"><button data-hours="1">1h</button><button data-hours="3">3h</button><button data-hours="6">6h</button><button data-hours="12">12h</button><button data-hours="24">24h</button><button data-hours="48" class="active" aria-pressed="true">48h</button></div></div>
+        <div id="neural-chart" class="chart-wrap small-chart"></div>
+        <div id="neural-legend" class="chart-caption radar-legend"></div>
+        <p id="neural-note" class="chart-note"></p>
+        <div id="neural-details" class="inline-notes"></div>
+        <p class="chart-note"><a href="/reports/weather/forecast-portfolio/report.html" target="_blank" rel="noopener">Alta 12h, radar &amp; HRRR forecast comparison ↗</a> · <a href="/reports/weather/neural48-trained/report.html" target="_blank" rel="noopener">Previous 48-hour model report ↗</a></p>
+      </section>
+      <div class="main-grid">
+        <section class="panel snow-panel" aria-labelledby="snow-chart-title">
+          <div class="panel-heading"><div><p class="eyebrow">Snowfall outlook</p><h3 id="snow-chart-title">A window into the next 48 hours</h3><p class="source-badge" id="hourly-source-badge">External forecast · Open-Meteo</p></div><div class="segmented" role="group" aria-label="Snow chart display"><button class="active" data-view="hourly" aria-pressed="true">Hourly</button><button data-view="cumulative" aria-pressed="false">Cumulative</button></div></div>
+          <div class="chart-toolbar"><span class="chart-zone" id="chart-zone">Mountain local time</span></div>
+          <div id="snow-chart" class="chart-wrap" aria-live="polite"></div><div id="snow-tooltip" class="chart-tooltip" role="status" hidden></div><div id="snow-color-legend" class="snow-color-scale" aria-label="Snowfall amount color scale"></div>
+          <div class="chart-caption"><span><i class="legend-line teal-line"></i><span id="hourly-model-label">Hourly weather guidance</span></span><span id="snowfall-caption">Fresh snowfall estimate · inches</span></div>
+          <p class="chart-note">This hourly curve is provided by Open-Meteo. The selected model forecast appears in the comparison above.</p>
+        </section>
+        <section class="panel daily-model-panel" aria-labelledby="daily-title"><div class="panel-heading"><div><p class="eyebrow" id="daily-eyebrow">Trained snowfall model</p><h3 id="daily-title">Daily snowfall estimate</h3></div><span class="round-icon" aria-hidden="true">❄</span></div><p class="panel-subtitle" id="daily-subtitle">Expected snowfall in each complete 24-hour reporting window.</p><div id="daily-cards" class="daily-cards"></div><div id="daily-color-legend" class="snow-color-scale" aria-label="Daily snowfall amount color scale"></div><p class="chart-note" id="daily-model-note">These estimates come from the trained station model using issued GFS weather forecasts.</p></section>
+      </div>
+      <section class="panel weather-panel" aria-labelledby="weather-title"><div class="panel-heading"><div><p class="eyebrow">External weather forecast · Open-Meteo</p><h3 id="weather-title">Temperature, wind & precipitation</h3></div><span class="subtle" id="weather-period"></span></div><div id="weather-table-wrap" class="weather-table-wrap"></div></section>
+
+      <div class="bottom-grid"><section class="panel context-panel"><div class="panel-heading"><div><p class="eyebrow">Read the forecast in context</p><h3>What this mountain supports</h3></div></div><div id="capability-list" class="capability-list"></div><details><summary>Data sources & model limitations</summary><div id="source-details" class="source-details"></div></details></section><section class="panel import-panel" id="drop-zone"><div class="import-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m-4 4 4-4 4 4M4 16v5h16v-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Bring back a saved forecast</h3><p>Drop a Snowline JSON export here to inspect its curves. For new online data, use Refresh above.</p><button id="import-button" class="secondary-button">Choose a JSON file</button><input type="file" id="import-file" accept="application/json,.json" hidden><p class="tiny-copy">Imported snapshots keep their original timestamps.</p></section></div>
+      <footer><span>Snowline <span class="footer-dot">·</span> Research in the mountains</span><span>Forecasts are experimental. Refresh updates inputs; it does not retrain models.</span></footer>
+    </section>
+  </main>
+</body>
+</html>

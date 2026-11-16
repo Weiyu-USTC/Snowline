@@ -1,0 +1,71 @@
+ALTA RADAR MODEL IMPLEMENTATION PROVENANCE
+
+The benchmark contains compact local adaptations, not author checkpoints.
+No published-paper accuracy is implied by the model-family names.
+
+ConvLSTM: two spatial scales, convolutional input/state LSTM transitions,
+encoder/forecast recurrence, softplus output and locked channel dropout.
+Original 2015 source:
+https://proceedings.neurips.cc/paper/2015/file/07563a3fe3bbe7e3ba84431ad9d055af-Paper.pdf
+
+DGMR adaptation: four-scale context stack; pixel unshuffle/shuffle; residual
+spectrally normalized blocks; stochastic latent stack with spatial attention;
+four recurrent ConvGRU decoder scales; separate spatial and temporal
+adversarial discriminators; hinge adversarial loss and ensemble-mean weighted
+reconstruction loss. Width reduced to base8, log1p precipitation training,
+nine10-minute input frames,20future frames (through200minutes fromlastinput),
+and two rather than six/four ensemble members during training. Common3-hour
+verification starts after the latency/reporting alignment chosen bycaller.
+The family does not represent the original90-minute5-minute DGMR experiment.
+DGMR pseudocode (c) DeepMind, licensed CC-BY4.0; adapted mechanisms and reduced
+network widths in src/alta_radar_models.py. Source attribution Ravuri etal2021:
+https://doi.org/10.1038/s41586-021-03854-z
+https://storage.googleapis.com/dm-nowcasting-example-data/pseudocode.zip
+https://github.com/google-deepmind/deepmind-research/tree/master/nowcasting
+Official inference notebook and pseudocode are preserved locally. No TensorFlow
+snapshot is loaded: available environment isPython3.14 withCPU-onlyPyTorch,
+while the official notebook useslegacyTensorFlow1graphs underTensorFlow2.
+
+NowcastNet adaptation: U-Net predicts per-lead motion and growth/decay;
+bilinear semi-Lagrangian transport operates in physical linear rate; a
+conditional encoder/noise projector/SPADE decoder generates coherent random
+trajectories; adversarial temporal discrimination and ensemble max-pool
+regularization train the generative stage. Evolution is trained first and
+then frozen. Width/depth, temporal discriminator and loss scales are reduced;
+rate and reconstruction regularization use log1p units. This is an independent
+implementation of paper mechanisms, not a verified reproduction of the
+CodeOcean architecture or weights. Official capsule access could not be
+verified with availablewebtools, so third-partyweights were notsubstituted.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10356617/
+https://doi.org/10.24433/CO.0832447.v1
+
+All models receive a second channel for causally available radar quality.
+Unavailable target pixels are masked in loss. Cadence, channel count,
+training steps, seed andvalidation-selected checkpoint are saved with eachfit.
+Raw ensembles are NOT assumed calibrated probabilities of resort snowfall.
+Surface snow conversion and calibrated24-hour uncertainty are separate tasks.
+
+ADDITIONAL INDEPENDENT IMPLEMENTATION AUDIT
+
+DGMR: the compact generator residual blocks omit the original BatchNorm,
+and the compact final convolution is not spectrally normalized. Original
+DGMR emits physical precipitation directly from its final linear convolution;
+it does not exponentiate a log-rate output. The first two local recipes used
+an exponential physical-rate parameterization. The third DGMR recipe retains
+all weights/shapes and changes only the output to positive physical rate
+(softplus), returning log1p(rate) to the shared training API. This fixes one
+numerical amplification mechanism, not every architectural difference.
+
+NowcastNet: the compact generator applies a bounded multiplicative correction
+to the evolution forecast. At an evolution rate of zero, the generator's
+0.001 mm/hour floor and residual bounded by three limit its rate to about
+0.0201 mm/hour. The evolution network can create new precipitation through
+its growth term, but the stochastic generator cannot independently create a
+strong new cell at a location where evolution remains zero. This limitation
+must not be attributed to the full published NowcastNet architecture.
+
+Wet-case sampling reweights the training objective and applies no inverse
+probability correction. Validation retains the predeclared calendar dates.
+MSE of a finite ensemble mean also penalizes member variance; raw stochastic
+spread is not assumed calibrated. Daily snowfall probabilities use a separate
+calibration model and must be assessed on held-out surface measurements.

@@ -1,0 +1,45 @@
+name: Source checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  forecast-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MPLBACKEND: Agg
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+          cache: pip
+      - name: Install forecast dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Compile Python source
+        run: python -m compileall -q src scripts tests
+      - name: Test source contracts without downloaded data
+        run: python scripts/test_source.py --verbose
+
+  mac-widget:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Test hourly refresh clock policy
+        run: |
+          xcrun swiftc -parse-as-library desktop/HourlyRefreshPolicy.swift desktop/tests/HourlyRefreshPolicyTests.swift -o "$RUNNER_TEMP/snowline-policy-tests"
+          "$RUNNER_TEMP/snowline-policy-tests"
+      - name: Build widget from source
+        run: /bin/zsh desktop/build.sh

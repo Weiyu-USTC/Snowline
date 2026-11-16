@@ -1,0 +1,900 @@
+{
+  "schema_version": 1,
+  "artifact_bundle": "snowline-runtime-2026-11-15.zip",
+  "install_root": ".",
+  "created_date": "2026-11-15",
+  "description": "Frozen deployed inference assets, small required reference data and historical research reports. Contains no raw weather/radar archive, environments, personal paths or active forecast snapshots. Public report copies retain historical snapshots only for their dated report figures.",
+  "files": [
+    {
+      "path": "data/alta_nowcast/model_sources/IMPLEMENTATION_NOTES.txt",
+      "bytes": 4465,
+      "sha256": "accd52cca302fd625dd50fb36115b93beb6f6140a64382ee0f7ada31b27423e7",
+      "role": "Original source attribution, data terms or compact-model implementation distinctions",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "data/alta_nowcast/model_sources/dgmr_pseudocode/pseudocode/LICENSE",
+      "bytes": 276,
+      "sha256": "5d1187986b0bf208931ccc7bf5b10ac9f51ad98f87546f62b41ba88c6dd06073",
+      "role": "Original source attribution, data terms or compact-model implementation distinctions",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "data/alta_nowcast/model_sources/material_architecture_differences.json",
+      "bytes": 716,
+      "sha256": "c2c5eac66b54c38a128fb9d49647f33ccf078d667d60e7007b5c43a52a547b8d",
+      "role": "Original source attribution, data terms or compact-model implementation distinctions",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "data/alta_nowcast/model_sources/provenance.json",
+      "bytes": 689,
+      "sha256": "84205e79ddc5a06a82328d4d58ee62ac187665ec660381d55f624c6ff94b1cd4",
+      "role": "Original source attribution, data terms or compact-model implementation distinctions",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "data/east_alta_research/alta_hive/STEENBURGH_readme20250408.txt",
+      "bytes": 5007,
+      "sha256": "abfa14b306287c2c34f941ad298f005092452356217e887ffb7baef84db3e233",
+      "role": "Original source attribution, data terms or compact-model implementation distinctions",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "data/east_alta_research/alta_hive/steenburgh_readme20230915.txt",
+      "bytes": 5936,
+      "sha256": "694e880866e8c24127071fb101a3f44610bf21dc9e3d750a64fa28ad9be2626f",
+      "role": "Original source attribution, data terms or compact-model implementation distinctions",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "data/neural48_training/targets/daily_targets.csv",
+      "bytes": 6758620,
+      "sha256": "4fed593e459e034398e1a65acb320c9cde018fbd6cfe0eb336473a24aa70447e",
+      "role": "Frozen daily history reference with original station/interval/quality flags",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "data/neural48_training/targets/manifest.json",
+      "bytes": 6025,
+      "sha256": "8b5ca18370e78bbe4693b183c48d9b1387e33f2c42627652967ad1afff117d5d",
+      "role": "Station target identities, attribution and source audit",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "data/roni_noaa.csv",
+      "bytes": 4651,
+      "sha256": "9f6f306273489ffbea68124945c7b89241135eb48f99039e5c8120929a0250c1",
+      "role": "NOAA revised RONI index used by frozen daily-model feature code",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/alta-nowcast/models/selected/convlstm.pt",
+      "bytes": 319253,
+      "sha256": "80c227d2d0033a329c7f4374f2ee43421e9ee48e7ca54f25ffbce0449b5f58f9",
+      "role": "Frozen compact Alta MRMS nowcast checkpoint",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/alta-nowcast/models/selected/dgmr.pt",
+      "bytes": 6695564,
+      "sha256": "477aaa438485b475976fa8a29bfd7d698eed39cd0fb66d48c976244753bca249",
+      "role": "Frozen compact Alta MRMS nowcast checkpoint",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/alta-nowcast/models/selected/nowcastnet.pt",
+      "bytes": 4003851,
+      "sha256": "a3540f1324981741deffa055be1ac7aeeee89a34dedde0a5cd7485a054028791",
+      "role": "Frozen compact Alta MRMS nowcast checkpoint",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/mountain-temperature/stowe_mountain_metrics.csv",
+      "bytes": 1826,
+      "sha256": "a41cf852f6b41f80888a2b2f34c9bf3eca319fe5883c5571df8b4d374a423dfc",
+      "role": "Portfolio report temperature metrics",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/mountain-temperature/stowe_mountain_operational.joblib",
+      "bytes": 99652,
+      "sha256": "cad7e6582d438449efc4c703aebbb5f41357dcefd7c711207d073cfb6c33eb93",
+      "role": "Frozen hourly mountain-temperature correction",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/mountain-temperature/vail_snotel_metrics.csv",
+      "bytes": 1832,
+      "sha256": "96f1acf9c5bef1c6197d2087bfd45584b7a063cc239efc0cc080a6b5f851c898",
+      "role": "Portfolio report temperature metrics",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/mountain-temperature/vail_snotel_operational.joblib",
+      "bytes": 334359,
+      "sha256": "0d6e61349479d9de3140fc75f3ed70570e6499749fa7543160749e34db1b7657",
+      "role": "Frozen hourly mountain-temperature correction",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nexrad-short/calibrators.pkl",
+      "bytes": 1959925,
+      "sha256": "48c96dad597b00810606b623decd7bbdbedbf1a5025b15f75b1e1c115faff3ea",
+      "role": "Frozen native NEXRAD predictor/calibration and radar-HRRR selection",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nexrad-short/paired_metrics.csv",
+      "bytes": 6100,
+      "sha256": "bef3cf8d77ef7d60c07dcde1fed9e75647769ccea45e9fa2c1e597c387414fe0",
+      "role": "Static historical metrics required to rebuild the main comparison report",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nexrad-short/portfolio_selection.json",
+      "bytes": 1556,
+      "sha256": "53343d5a70d809a966e91bda179cdcdc551129797652afa818b8d7df892e2351",
+      "role": "Frozen native NEXRAD predictor/calibration and radar-HRRR selection",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nexrad-short/selection.json",
+      "bytes": 1001,
+      "sha256": "78e118a5343f7920211fca55263e2c286b5949aeeb755d30277bbbdefb74d915",
+      "role": "Frozen native NEXRAD predictor/calibration and radar-HRRR selection",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/bundle.pkl",
+      "bytes": 10952240,
+      "sha256": "4b7bfc4f198f6100433ec67c5d9c2803d3b08a55704f747c92c4efe2fbb6bb18",
+      "role": "Frozen Alta 12-hour model portfolio",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/hyperparameter_search.csv",
+      "bytes": 1335,
+      "sha256": "2ec40690d3287669e782e2f7e6e3556f2ffe4d5816f1db0f8160ad5a51fc4571",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/manifest.json",
+      "bytes": 11586,
+      "sha256": "3e293db1f2ec25724ac48dfd7b65db76120eb19c84085988cf31eae8949d008f",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/metrics.csv",
+      "bytes": 10672,
+      "sha256": "1a882fe1a0a439f772801f23ffd901dde495a274e8980530df1405a73d7baf2c",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/metrics_missing_history.csv",
+      "bytes": 8536,
+      "sha256": "a725f65d5b3fb7ef21f3d05294e5fa2b776dc67fa72011c98f8000a9f1d3e43a",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/metrics_observations.csv",
+      "bytes": 7236,
+      "sha256": "ab6c639af32879b2cd8a1beded2ee524f6c47cb826e2aedc5712a0ff93ac9e74",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/native_asnow_audit.json",
+      "bytes": 1577,
+      "sha256": "70bada8734d546ca62700765740f8d9145e1fbf6d744e33343a96b1894cbf486",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/native_asnow_predictions.csv",
+      "bytes": 93306,
+      "sha256": "aee6db4c768adf3db97c8fc65efc6a0326b1b09b941bbd5587b5891e887b3991",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/paired_comparisons.csv",
+      "bytes": 799,
+      "sha256": "fe109339370073a120859ac2b38c6a24995cc10c5eb5c9c85c8f78ee3ca6c980",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/report.html",
+      "bytes": 15590,
+      "sha256": "f0d7befb4f026d657cee9593889f37b059db47954cc5077bc41c5d954a6b0959",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/test_errors.png",
+      "bytes": 66101,
+      "sha256": "792d24ac06b4694360e3ef6dee36fcac49bb22fc8d26ba1fd9d3b1a9758d51f1",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/test_predictions.csv",
+      "bytes": 648384,
+      "sha256": "1e25e00721d6666122e19f5579272dfed93c86f7f2563e0e54fb5d477b727a65",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/test_timeseries.png",
+      "bytes": 501010,
+      "sha256": "87eddf5b27b7395b19b0ca1ee80343a496b9865c07d33b33503e0ac65662262a",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/training_curves.csv",
+      "bytes": 15541,
+      "sha256": "2fb16a1c1156ab89e848b602e054c32f80eb26e24b18067964bf042170a53aae",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/alta12-trained/training_losses.png",
+      "bytes": 93615,
+      "sha256": "89ce3d4926b5e4d591542b5c29b37cd560a54d3a2ff62aa51cf02e1bd8dbe1f8",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/deployment_selection.json",
+      "bytes": 19976,
+      "sha256": "034d29c2f5d96b8275801e14f297ebc75a77876181aef81be6d5bbf87897b72c",
+      "role": "Frozen per-horizon deployment and HRRR-neural weights",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/audit.json",
+      "bytes": 2326,
+      "sha256": "cb7404277ce6bfc81b3e881922b3a06daab8a8e30a0a17752f67380d15d4347f",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/comparison.html",
+      "bytes": 16370,
+      "sha256": "f7557e5f163770bd8f23c164b3ecf2d76223c3fa1bd0006823fb4cd3d78c455a",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/comparison_audit.json",
+      "bytes": 2054,
+      "sha256": "26705bc5ebd20885bdf258c17ebb17c372c6e01da895326c52358deb64d112c5",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/comparison_availability.csv",
+      "bytes": 1690,
+      "sha256": "fc2b402745ddb8e5771d0a601a8bdb77369271e9b8fd04f584a2574b7058d5d0",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/comparison_cases.csv",
+      "bytes": 100463,
+      "sha256": "2acf019c320ae3d229682ed28fa286cacc67f4d7e9bb0be8f8ef365cf30a5c71",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/comparison_metrics.csv",
+      "bytes": 2978,
+      "sha256": "a24b7173566ace34ee88398f2a38bb8467a81e00a4b4fe86c2c39b81358ed2f1",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/comparison_rmse.png",
+      "bytes": 165183,
+      "sha256": "cfd80c0cbf84e12f3aad876de4c43544d9a9e36d17eed3249e120c4b91c4ed2c",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/dry_wet_rmse.png",
+      "bytes": 138569,
+      "sha256": "3bfaac7e2da4a6ca29eeb1c0bd37fba5434f4ec53dd2a1f31457eb62912c7ec4",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/heldout_cases.csv",
+      "bytes": 471411,
+      "sha256": "e095bb1e742db24f532b2be2e5228e6d8210773f95f861740ebf4a118f5b8a60",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/metrics.csv",
+      "bytes": 11317,
+      "sha256": "85224cf960f48e776643bdd4224739dc2fa8b2f815f715b6ec55cb638e0fe26c",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/paired_comparisons.csv",
+      "bytes": 8160,
+      "sha256": "7d428da03442f1d9c3ed9f4b872486d97dcdf0518b874663be28054b98738422",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/provider12_matched.csv",
+      "bytes": 12420,
+      "sha256": "15ad7dbccc5a02c39e9fa735977939319240726b5a88fb19dc81e8b5a2d0aebf",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/provider24_matched.csv",
+      "bytes": 20267,
+      "sha256": "17b6153a5c7cc07f4ae503c8a3d38e2769ecb9d36ba3899d6c9ded4ba6069fbf",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/provider_alignment_audit.json",
+      "bytes": 4438,
+      "sha256": "0f1a6d28028a1cbb706fbef061438590f8825989e2d6ddc5ab6cabb317878ddc",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/report.html",
+      "bytes": 27803,
+      "sha256": "71a46ceafc0e2feb2673429796c63094e048291200f48857d1f7839355a7d07e",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/selected_summary.csv",
+      "bytes": 858,
+      "sha256": "80dea1c1a79adb5960bee2411f4c81c1481ad7039b48bd476b3e51df77ab0f7a",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/short_audit.json",
+      "bytes": 2808,
+      "sha256": "d46021051af8de70600b42310269d4ba1b0ce75d4ed7528907a3a8068e6cacc3",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/short_cases.csv",
+      "bytes": 31006,
+      "sha256": "42f4f55354b5bab4796cf49c853bc2986f0eb593680bba9400dc3f56725434c4",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/short_comparison.csv",
+      "bytes": 1050,
+      "sha256": "cec02d279089b4c9e1a9ff07e34568619e7a5f4a8d161ee364d3f1936cda4f70",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/short_heldout_cases.csv",
+      "bytes": 150968,
+      "sha256": "978e498bbfc6d6dd0d699e947fa0c190ae0482821978fb2c124e53abac3173ac",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/short_metrics.csv",
+      "bytes": 5288,
+      "sha256": "9dab072623021fca1daafcc9be1a87d782ebfd7426a963fbd546d5c6e853fcea",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/dry-wet/short_summary.csv",
+      "bytes": 1530,
+      "sha256": "7a3dfdbe4fa3261916fbaaa9551afe02f26983cf1eeae154f04f5287e65972fa",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/hrrr24_metrics.csv",
+      "bytes": 2866,
+      "sha256": "bd490fd64f241469d3363b45bd9ff79a9ee6cd606dd4556804cef807e4d468fd",
+      "role": "Static historical metrics required to rebuild the main comparison report",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/hrrr24_selection.json",
+      "bytes": 4472,
+      "sha256": "1567e3dd984d7c24c8394baf692e2daa36d854bc956279402e75e78511d868f1",
+      "role": "Frozen per-horizon deployment and HRRR-neural weights",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/index.html",
+      "bytes": 9620,
+      "sha256": "f992978f171822304dd310f246160bd84e01a878e4084c18da1b5a53cec46e2d",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/report.html",
+      "bytes": 9620,
+      "sha256": "f992978f171822304dd310f246160bd84e01a878e4084c18da1b5a53cec46e2d",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/source_coverage.csv",
+      "bytes": 949,
+      "sha256": "2cca9ee6bf79b2c963cd3ae09016d159afc727613ee78ca1750fb4bd15f524bc",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/source_manifest.json",
+      "bytes": 5342,
+      "sha256": "3e7549c09df2489dfcf85b6fb570361e3e2eeea1109e7b375beadd255c74b4d3",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_audit.json",
+      "bytes": 6237,
+      "sha256": "fc6c8c9a183aeef8e67e3416cc5839a8e205f03406fc71bd1e5c927ed98ed790",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_current.csv",
+      "bytes": 21027,
+      "sha256": "a8c6e535f7a0206e0220d93fb20798b731a2ca9b9858e6cb95587f6051e0eef2",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_current_curve.png",
+      "bytes": 114346,
+      "sha256": "50986cee0c060ea5dc9afe265c5807d87f4b996006ad5c6ba7fd779351b04264",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_metrics.csv",
+      "bytes": 1826,
+      "sha256": "a41cf852f6b41f80888a2b2f34c9bf3eca319fe5883c5571df8b4d374a423dfc",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_observation_gain.json",
+      "bytes": 1065,
+      "sha256": "e214c7131a964f808cced47474cf1612e9eee910587729cbce349cd3fbe25824",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_predictions.csv",
+      "bytes": 5912090,
+      "sha256": "f34ad57f03ee037bb6b2dd44770397323cfeda92cb2b51080f6ac76f142bcce1",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_predictions.csv.gz",
+      "bytes": 671929,
+      "sha256": "b7cc849e916cb8a936c844a8f551924551640a26ae9002d10bdbeb525e5f7b69",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_test_curves.png",
+      "bytes": 290692,
+      "sha256": "c4610987fc3c9fdab02beaafe144c4c61733ba0b9571715d73dca19d35e8c9a4",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/stowe_mountain_validation_search.csv",
+      "bytes": 2230,
+      "sha256": "bd417d070d7bcad48901b9afe31c1fa248ba5fe70ff1748131bd65ef7eb656ea",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/summary.json",
+      "bytes": 2401,
+      "sha256": "ea19845b645aff657b0a411b0508513fbfe0e8f8eaaedbe52fc50a17d93890e9",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_audit.json",
+      "bytes": 5904,
+      "sha256": "4c0fb442cec20901670aa892f027df67c06b778463f04e0f7abd1090e6b536bd",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_current.csv",
+      "bytes": 20962,
+      "sha256": "e4c572de2c97bff936cb423edc6d3098143b0e5e179cf2074f981cdfb5c4c074",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_current_curve.png",
+      "bytes": 118371,
+      "sha256": "2a952d8698388194d178c831938584e4912a0538dae9005dafc4729c75b845d0",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_metrics.csv",
+      "bytes": 1832,
+      "sha256": "96f1acf9c5bef1c6197d2087bfd45584b7a063cc239efc0cc080a6b5f851c898",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_observation_gain.json",
+      "bytes": 1054,
+      "sha256": "3cceeb75e20e62d483ba14130bfaa11c2d4b30f0beeb4950920b92fea9e6976d",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_predictions.csv",
+      "bytes": 8552079,
+      "sha256": "f0bcc937446da4b3dd61a0e8cffe8dedafbebd9f569d33a819634354e578fba6",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_predictions.csv.gz",
+      "bytes": 883550,
+      "sha256": "8df65d9c1dc9c900cdd11466e006bfa829fa71e07af514883d01343622f7829a",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_test_curves.png",
+      "bytes": 267526,
+      "sha256": "6e9e1d92ce10845fc18a37d100a72536257c680108910b505786972612fafb3b",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/mountain-temperature/vail_snotel_validation_search.csv",
+      "bytes": 2220,
+      "sha256": "8cdef6c06659a965612201a964dd44a8cbd4fa3da6b1563e7c10550d8d2364c7",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/case_predictions.csv",
+      "bytes": 544417,
+      "sha256": "d091bb0854909e5375bfcf4cd3a18f3550cc422e6f9424ef8df8289e7e6d789e",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/comparison.pdf",
+      "bytes": 32980,
+      "sha256": "36782eb9e67c4c2af91335627ae5afb3a2e290e6730e3c4f6a82b04793f6d780",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/comparison.png",
+      "bytes": 235042,
+      "sha256": "c83fa21b4f24ea9cb274f885a378d50dcdebddd6f6e45f91dfba47827edd582c",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/coverage.json",
+      "bytes": 5316,
+      "sha256": "1f842447ef1b809fe481c2979e8e58944f1114b0cd9a9457a41b7c4139c61ae8",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/current_forecast.json",
+      "bytes": 22795,
+      "sha256": "a26592c6fcc6fc955282046e29c265ed7b6385c161a8e59a5714a89618571ef8",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/current_liquid.png",
+      "bytes": 73690,
+      "sha256": "adafba88e3bd0840b3c15c62fb596aeafd7b04ee585eaf99770a4964d86e9f97",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/metrics.csv",
+      "bytes": 9381,
+      "sha256": "7c92970ab3ecb9d78939beaf78e499ee42dc496bd978f71d63a76bad26f26bae",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/paired_metrics.csv",
+      "bytes": 6100,
+      "sha256": "bef3cf8d77ef7d60c07dcde1fed9e75647769ccea45e9fa2c1e597c387414fe0",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/paired_predictions.csv",
+      "bytes": 320212,
+      "sha256": "580a3acfa77920f3f65176d4d179629381d9c4a80a286377d6f0017907851c36",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/portfolio_plan.json",
+      "bytes": 456,
+      "sha256": "f76fd3800b35f9a27541bae5949784f1f086deb5e615fb60f25c8a7e1c81e3ab",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/portfolio_selection.json",
+      "bytes": 1556,
+      "sha256": "53343d5a70d809a966e91bda179cdcdc551129797652afa818b8d7df892e2351",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/report.html",
+      "bytes": 9174,
+      "sha256": "7354131b637ea0bc3d718ebe09466b8ea052ad73731e997a96bae62691c34844",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/report.json",
+      "bytes": 10569,
+      "sha256": "67f4d6e3552f83c20ea85f01940bb75940dd88df4350dc147dcdb9dd62bec356",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/selection.json",
+      "bytes": 1001,
+      "sha256": "78e118a5343f7920211fca55263e2c286b5949aeeb755d30277bbbdefb74d915",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/storm_examples.json",
+      "bytes": 588,
+      "sha256": "69e1b98a68803b21bebd97291c1419887495ee998fd0b9666aca6758f2488a43",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/forecast-portfolio/nexrad/storm_examples.png",
+      "bytes": 161194,
+      "sha256": "0a3d5d72794e86e45adcdd2cfec7dba0613d6b1fa345baa13827d7e3b0676488",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/mos/alta/chronological_metrics.csv",
+      "bytes": 4095,
+      "sha256": "f8db2f13383f16bcce1304fd55e9936e7cb8e203ad3afc10545ac1380e3a9eb9",
+      "role": "Daily model evaluation displayed in dashboard",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/mos/alta/final_models.joblib",
+      "bytes": 42292481,
+      "sha256": "98c5657d984504da9c2a8fbdb689244c710e6573273be639a43fe0d830c0e6fe",
+      "role": "Frozen daily forecast models and climatology",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/mos/jay/chronological_metrics.csv",
+      "bytes": 4254,
+      "sha256": "02671b8c253d5dff89111a806733cc76f263492ab9ab7c2d19d445849845a3af",
+      "role": "Daily model evaluation displayed in dashboard",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/mos/jay/final_models.joblib",
+      "bytes": 19136385,
+      "sha256": "15476eef18e3f32f3826ede67ca5a1122549ddd9c6d70333a363b2ed6323281f",
+      "role": "Frozen daily forecast models and climatology",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/mos/mansfield/chronological_metrics.csv",
+      "bytes": 4235,
+      "sha256": "1206aeafeb7d409e89c4be8e6007315dfcc86cf8e9b1620d8da81e7cada37b5e",
+      "role": "Daily model evaluation displayed in dashboard",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/mos/mansfield/final_models.joblib",
+      "bytes": 29291689,
+      "sha256": "6ca96414d6e0cb043b7e745a48fbf144de32aab01852575803622a2d146069b3",
+      "role": "Frozen daily forecast models and climatology",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/mos/vail/chronological_metrics.csv",
+      "bytes": 4281,
+      "sha256": "714b6fe89cf5893d10c84e21462176517a3636d63446e580cb971ca033261127",
+      "role": "Daily model evaluation displayed in dashboard",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/mos/vail/final_models.joblib",
+      "bytes": 12620368,
+      "sha256": "22b5fa9a0c0675c8d4721a68515c7c62d944c5974873d8f60c6af692c23e498a",
+      "role": "Frozen daily forecast models and climatology",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/bootstrap_comparisons.json",
+      "bytes": 3359,
+      "sha256": "f32c36c2fbf6bd87378fcadcc7b873983209e77eb2b52606036e83a2f72854bc",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/heldout_curves.png",
+      "bytes": 664076,
+      "sha256": "39b7b184875c8059963c8335187bec4e2f6f254493c1e876ee9a45ce2f1440e5",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/metrics.csv",
+      "bytes": 19235,
+      "sha256": "2e71e5fdb170b0cb53715a5bf0bd475c3ad370acbe4081a9acae56132db02c1d",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/baselines.pkl",
+      "bytes": 3604055,
+      "sha256": "cf4b26b1ad9c8c53bae5acfb2edcc4a061eadbbb3ee66d5eda31a89309881bcf",
+      "role": "Frozen 24/48-hour neural ensemble, preprocessing, selection and baselines",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/preprocessing.json",
+      "bytes": 12710,
+      "sha256": "87b9d4db13db37a40fc0258a2be7f72a6f01f11a9aa0fd99d57eb7d73f11a576",
+      "role": "Frozen 24/48-hour neural ensemble, preprocessing, selection and baselines",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/selection.json",
+      "bytes": 2559,
+      "sha256": "38affb6cdf0195f63ce1da19a4753a723953c8d02377a3a45cf311bb1755a592",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/weather_only_seed20261111.pt",
+      "bytes": 145185,
+      "sha256": "82ac9aff16ed253196bbc0e7efead03f336847eed7965607d72606ca3802ef49",
+      "role": "Frozen 24/48-hour neural ensemble, preprocessing, selection and baselines",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/weather_only_seed20261112.pt",
+      "bytes": 145185,
+      "sha256": "b85ce1059bc4185e015a91785925d2060dad98ae2878ca95a98a4341af925eb6",
+      "role": "Frozen 24/48-hour neural ensemble, preprocessing, selection and baselines",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/weather_only_seed20261113.pt",
+      "bytes": 145185,
+      "sha256": "7712c3611db21286b85122f3251f9ebab6a606ed5765cc1c740a77cca84ba547",
+      "role": "Frozen 24/48-hour neural ensemble, preprocessing, selection and baselines",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/weather_radar_seed20261111.pt",
+      "bytes": 252673,
+      "sha256": "5af713382ba46fc1da1201c93d9be76c55d2a65d24f3f2bc8b73857be7c6a448",
+      "role": "Frozen 24/48-hour neural ensemble, preprocessing, selection and baselines",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/weather_radar_seed20261112.pt",
+      "bytes": 252673,
+      "sha256": "3864fbffb4e395b4dc63fda26414e9633aad5612acff5f7ad1d671f3feecbaad",
+      "role": "Frozen 24/48-hour neural ensemble, preprocessing, selection and baselines",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/models/weather_radar_seed20261113.pt",
+      "bytes": 252673,
+      "sha256": "746518b59a4eb8431442a7d4c70f7546907acc21bed7b2cf63f7d7ed11817181",
+      "role": "Frozen 24/48-hour neural ensemble, preprocessing, selection and baselines",
+      "required_for_live_inference": true
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/optimization_runs.csv",
+      "bytes": 3180,
+      "sha256": "7b1f6aa63c73890db28341addab1bc9a9a75592d8a89c0a6afb52e702f37ec5e",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/report.html",
+      "bytes": 29144,
+      "sha256": "0899263e15f0b79ba7ffcdaf1606ba770bff7863814c67b12d76f5c9fbb92f87",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/report_forecast_snapshot.json",
+      "bytes": 58629,
+      "sha256": "184320ec243ff88557cf572453345e150d338ba7f01ecf25a9b7d246ecf74041",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/report_forecast_snapshot.png",
+      "bytes": 248373,
+      "sha256": "135faa13e19da3d3699e11823f395ac77a068b1cb6bfc484925214196f779793",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/test_error_comparison.png",
+      "bytes": 87926,
+      "sha256": "9874d4ddc6350e2079bedfc269013f36a19eb129be965e860f6e56ae71808993",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/training_plan.json",
+      "bytes": 1053,
+      "sha256": "6f6e101a0b8c26da615a71955cab5953ed7363881d143670056885232d10207c",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    },
+    {
+      "path": "outputs/nwp-weather/neural48-trained/training_validation.png",
+      "bytes": 162523,
+      "sha256": "c63b226fa96dc60505ef789fd0da4ea36cbe576272403ec52f7ac439cfe9dac6",
+      "role": "Frozen historical research report asset; timestamps are not refreshed",
+      "required_for_live_inference": false
+    }
+  ],
+  "total_bytes": 161630630,
+  "data_terms": "See docs/DATA_SOURCES.md. Source code licensing does not replace data or third-party attribution terms.",
+  "excluded": [
+    "Raw radar and HRRR archives",
+    "Historical training arrays and optimizer runs",
+    "Active data caches and runtime forecast snapshots",
+    "Third-party TabPFN weights and model cache",
+    "Compiled desktop app and Python environments"
+  ]
+}
