@@ -18,18 +18,25 @@ The source repository deliberately excludes downloaded archives, current forecas
 
 ## Run locally
 
-The released models were tested with **Python 3.14** and the direct dependency versions in `requirements.txt`. The web dashboard runs as a local Python service; the floating widget requires macOS 13+ and Apple's command-line developer tools. macOS is the tested desktop platform. The Linux CI workflow is provided but has not yet run on GitHub.
+The released models were tested with **Python 3.14** and the direct dependency versions in `requirements.txt`. The web dashboard runs as a local Python service; the floating widget requires macOS 13+ and Apple's command-line developer tools. macOS is the tested desktop platform. [GitHub Actions passed the Linux Python checks and the macOS widget build](https://github.com/Weiyu-USTC/Snowline/actions/runs/43799532516).
 
-From the extracted source folder or a clone of this repository:
+Download the **[v0.1.0 model bundle (46.6 MB)](https://github.com/Weiyu-USTC/Snowline/releases/download/v0.1.0/snowline-runtime-2026-11-15.zip)** from the **[Snowline v0.1.0 release](https://github.com/Weiyu-USTC/Snowline/releases/tag/v0.1.0)**. The release also provides [SHA-256 checksums](https://github.com/Weiyu-USTC/Snowline/releases/download/v0.1.0/SHA256SUMS.txt).
+
+With Python 3.14 installed, start from a new folder in Terminal:
 
 ```sh
+git clone --branch v0.1.0 https://github.com/Weiyu-USTC/Snowline.git
+cd Snowline
 bash scripts/setup.sh
-.venv/bin/python scripts/install_runtime.py /path/to/snowline-runtime-2026-11-15.zip
+curl --fail --location --retry 3 \
+  --output artifacts/snowline-runtime-2026-11-15.zip \
+  https://github.com/Weiyu-USTC/Snowline/releases/download/v0.1.0/snowline-runtime-2026-11-15.zip
+.venv/bin/python scripts/install_runtime.py artifacts/snowline-runtime-2026-11-15.zip
 .venv/bin/python scripts/doctor.py
 .venv/bin/python src/serve_snow_dashboard.py --open
 ```
 
-Replace the ZIP path with the companion download's actual location. Obtain the source and runtime bundle from the same release. The installer verifies every artifact against `artifacts/runtime-files.json` before installing it. It does not download or execute an installer from another website.
+If you already have this release's source, run the commands beginning with `bash scripts/setup.sh` from its root folder. A tagged clone starts in detached-HEAD mode, which is fine for running the release; create a branch before developing changes. Obtain the source and runtime bundle from the same release. The installer verifies all 126 files against `artifacts/runtime-files.json` before installing them. The model ZIP belongs under the Git-ignored `artifacts/` directory; downloaded inputs and installed models stay in Git-ignored `data/` and `outputs/` directories.
 
 Open **http://127.0.0.1:8765/** and click **Refresh all**. The first update can take several minutes and download substantial weather/radar data. Missing or late feeds are reported separately; a missing forecast is never silently presented as zero. If a service is temporarily unavailable, a later refresh can retry it.
 
