@@ -1,25 +1,31 @@
-# Put Snowline in your GitHub repository
+# Publish Snowline manually
 
-1. Extract `snowline-source-2026-11-15.zip`.
-2. Copy the **contents** of its `snowline/` folder into your intended repository. For an existing project, review changes before replacing files; retain its applicable license and repository settings.
-3. Commit the source, docs, workflow, requirements, and artifact manifest. `.gitignore` excludes runtime data, checkpoints, caches, environments, and built apps.
-4. Create a GitHub Release and attach `snowline-runtime-2026-11-15.zip` and the supplied `SHA256SUMS.txt`. The model bundle belongs in release assets, not ordinary Git history.
-5. Update the README with your release download link. Keep matching source and runtime versions together; the installer checks the per-file hashes in the source manifest.
-6. Review the GitHub Actions results after pushing. The included workflow was tested locally in its component checks; it has not been run in your GitHub repository yet.
+The source repository is [Weiyu-USTC/Snowline](https://github.com/Weiyu-USTC/Snowline). The README is prepared for the `v0.1.0` release. Its download links become available after the release and both assets below are published.
 
-For a new empty repository, after configuring your own remote:
+## Push the source with GitHub Desktop
 
-```sh
-git init
-git add .
-git status --short
-git commit -m "Prepare Snowline research app"
-git branch -M main
-git remote add origin YOUR_REPOSITORY_URL
-git push -u origin main
+1. Use **File → Add Local Repository** and select the `snowline-github` folder containing this README. If it is already listed, select that repository.
+2. On `main`, review the changes, enter a commit summary, and click **Commit to main**.
+3. Click **Push origin**. Review the repository's Actions results after pushing. The preceding source revision passed both the Linux Python checks and the macOS widget build in [this run](https://github.com/Weiyu-USTC/Snowline/actions/runs/43799532516).
+
+The runtime ZIP is separate from source control. Do not force-add downloaded data, weights, environments, or compiled apps to Git.
+
+## Publish the model bundle
+
+1. Open the repository's **Releases** page yourself and choose **Draft a new release**.
+2. Create tag **`v0.1.0`** targeting the `main` commit you just pushed.
+3. Set the title to **Snowline v0.1.0 — model bundle**. Describe it as the frozen research inference bundle for Alta, Vail, Stowe, and Jay Peak; link to the README installation instructions and `docs/DATA_SOURCES.md`.
+4. Attach **`snowline-runtime-2026-11-15.zip`** (46,633,267 bytes) and **`SHA256SUMS.txt`**. Use the checksum file prepared specifically for this release, whose only entry is shown below.
+5. Wait for both uploads to finish, then publish the release.
+6. Open the README's release and asset links to confirm they download successfully. GitHub automatically supplies source archives for the release tag.
+
+Expected `SHA256SUMS.txt` contents:
+
+```text
+aa6401bb0b91ba3f94f084355930deb73e172bde2768ff5b93e7ec67d073611a  snowline-runtime-2026-11-15.zip
 ```
 
-Use your actual repository URL in place of `YOUR_REPOSITORY_URL`. For an existing checkout, use its current branch and remote rather than re-running these initialization steps. This package does not create a repository, upload files, publish a release, or alter access settings on your behalf.
+Keep the tag and asset names exactly as written so the README links work. Keep matching source and runtime versions together: the installer verifies all 126 files against the hashes in `artifacts/runtime-files.json`. Uploading a release asset is a separate step from pushing commits with GitHub Desktop.
 
 ## Release contents
 

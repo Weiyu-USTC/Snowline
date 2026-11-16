@@ -22,6 +22,8 @@ The released models were tested with **Python 3.14** and the direct dependency v
 
 Download the **[v0.1.0 model bundle (46.6 MB)](https://github.com/Weiyu-USTC/Snowline/releases/download/v0.1.0/snowline-runtime-2026-11-15.zip)** from the **[Snowline v0.1.0 release](https://github.com/Weiyu-USTC/Snowline/releases/tag/v0.1.0)**. The release also provides [SHA-256 checksums](https://github.com/Weiyu-USTC/Snowline/releases/download/v0.1.0/SHA256SUMS.txt).
 
+These links require the `v0.1.0` release and its assets to be published. Pushing the source through GitHub Desktop does not upload the model bundle; maintainers can follow the [manual release steps](docs/PUBLISHING.md).
+
 With Python 3.14 installed, start from a new folder in Terminal:
 
 ```sh
