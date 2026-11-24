@@ -15,38 +15,78 @@
     <div class="header-right"><div class="unit-switch" role="group" aria-label="Measurement units"><button type="button" data-units="us" aria-pressed="true" class="active" title="US units: inches, Fahrenheit and miles per hour">US<small>in · °F</small></button><button type="button" data-units="metric" aria-pressed="false" title="Metric units: centimeters, Celsius and kilometers per hour">Metric<small>cm · °C</small></button></div><span class="local-label"><span class="status-dot"></span>Local research dashboard</span><button class="icon-button" id="export-button" title="Export forecast JSON" aria-label="Export forecast JSON" disabled><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v5h14v-5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
   </header>
   <main>
-    <div class="intro"><div><p class="eyebrow">A closer look at the next storm</p><h1>The mountain, hour by hour.</h1><p class="intro-copy">Fresh weather guidance, trained snowfall models, and the uncertainty between them.</p></div><div class="refresh-controls"><button id="refresh-button" class="primary-button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.4 6.3A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.6 5.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Refresh all</span></button><p class="refresh-note">Weather, radar &amp; HRRR · all four mountains</p></div></div>
+    <div class="intro"><div><p class="eyebrow">A closer look at the next storm</p><h1>The mountain, hour by hour.</h1><p class="intro-copy">Fresh weather guidance, trained snowfall models, and the uncertainty between them.</p></div><div class="refresh-controls"><button id="refresh-button" class="primary-button"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.4 6.3A8 8 0 0 1 20 12M4 12a8 8 0 0 0 13.6 5.7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><span>Refresh all</span></button><p class="refresh-note">Weather &amp; observations · all mountains</p></div></div>
     <div id="job-status" class="job-status" role="status" aria-live="polite" hidden></div>
     <div id="error-banner" class="notice notice-error" role="alert" hidden></div>
     <nav id="mountain-list" class="mountain-list" aria-label="Choose mountain"></nav>
     <section id="forecast" aria-labelledby="mountain-title">
       <div class="forecast-heading"><div><div class="mountain-location" id="mountain-location">Utah</div><h2 id="mountain-title">Alta</h2><p id="target-label" class="target-label">Loading mountain information…</p></div><div class="freshness"><span id="data-status" class="badge neutral">Connecting</span><p id="updated-at">Checking saved forecasts</p><p id="source-label"></p></div></div>
       <div id="snapshot-banner" class="notice" hidden></div>
-      <div class="summary-grid">
+      <div class="summary-grid" id="summary-grid">
         <article class="summary-card"><div class="card-label"><span id="snow-total-label">Next 48 hours</span><span class="tiny-tag">Weather guidance</span></div><p class="metric"><span id="snow-total">—</span><span class="metric-unit" id="snow-total-unit">in</span></p><div class="metric-description">Forecast fresh snowfall</div></article>
-        <article class="summary-card"><div class="card-label" id="model-summary-label">Our model · 48-hour snow</div><p class="metric"><span id="daily-snow-amount">—</span><span class="metric-unit" id="daily-snow-unit">in</span></p><div class="metric-description" id="daily-snow-description">Next complete reporting window</div></article>
+        <article id="model-summary-card" class="summary-card"><div class="card-label" id="model-summary-label">Our model · 48-hour snow</div><p class="metric"><span id="daily-snow-amount">—</span><span class="metric-unit" id="daily-snow-unit">in</span></p><div class="metric-description" id="daily-snow-description">Next complete reporting window</div></article>
         <article class="summary-card"><div class="card-label">Temperature range<span class="weather-glyph" aria-hidden="true">°</span></div><p class="metric metric-small"><span id="temperature-range">—</span><span class="metric-unit" id="temperature-unit">°F</span></p><div class="metric-description">Across the selected horizon</div></article>
         <article class="summary-card"><div class="card-label">Peak wind<span class="weather-glyph" aria-hidden="true">↗</span></div><p class="metric"><span id="peak-wind">—</span><span class="metric-unit" id="wind-unit">mph</span></p><div class="metric-description">Forecast sustained wind</div></article>
       </div>
+      <section id="season-panel" class="panel season-panel" aria-labelledby="season-title">
+        <div class="panel-heading">
+          <div><p class="eyebrow">The season in perspective</p><h3 id="season-title">Season snowfall</h3><p id="season-target" class="panel-subtitle">Comparing accumulated snowfall at the observation site.</p></div>
+          <span id="season-status" class="badge neutral">Loading history</span>
+        </div>
+        <div class="season-overview">
+          <div><span id="season-total-label" class="season-metric-label">Observed this season</span><strong id="season-total">—</strong><span id="season-observed-through" class="season-metric-note">Waiting for observations</span></div>
+          <div><span class="season-metric-label">Historical comparison</span><strong id="season-history-count">—</strong><span class="season-metric-note">Each faint line is one past season</span></div>
+          <div class="season-view-control"><div class="segmented" role="group" aria-label="Season chart range"><button type="button" data-season-view="full" class="active" aria-pressed="true">Full season</button><button type="button" data-season-view="recent" aria-pressed="false">Recent + forecast</button></div><span id="season-window-note" class="season-metric-note">October through May · forecast up to 48 hours</span></div>
+        </div>
+        <div id="season-chart" class="chart-wrap season-chart" aria-live="polite"></div>
+        <div id="season-tooltip" class="chart-tooltip season-tooltip" role="status" hidden></div>
+        <div id="season-legend" class="chart-caption season-legend"><span id="season-history-key"><i class="legend-line season-history-line"></i><span id="season-history-label">Past seasons</span></span><span id="season-current-key"><i class="legend-line season-current-line"></i><span id="season-current-label">Observed this season</span></span><span id="season-forecast-key"><i class="legend-line season-forecast-line"></i>Our model</span><span id="season-band-key"><i class="season-band-key"></i><span id="season-interval-label">Model prediction range</span></span></div>
+        <p id="season-chart-note" class="chart-note">The forecast continues from the latest complete observed total. Missing observations remain missing.</p>
+        <div id="season-notices" class="season-notices" role="status"></div>
+        <details class="season-source-details"><summary>Observation sources &amp; coverage</summary><div id="season-sources" class="source-details"></div></details>
+      </section>
       <section class="panel neural-panel" id="neural-panel" aria-labelledby="neural-title">
         <div class="panel-heading"><div><p class="eyebrow" id="neural-eyebrow" hidden></p><h3 id="neural-title">Forecast window · in</h3></div><span id="neural-status" class="badge neutral">Research</span></div>
         <p id="neural-subtitle" class="panel-subtitle" hidden></p>
-        <div class="chart-toolbar"><div id="horizon-buttons" class="horizon-buttons" role="group" aria-label="Forecast horizon"><button data-hours="1">1h</button><button data-hours="3">3h</button><button data-hours="6">6h</button><button data-hours="12">12h</button><button data-hours="24">24h</button><button data-hours="48" class="active" aria-pressed="true">48h</button></div></div>
+        <div id="mammoth-quantity" class="segmented" role="group" aria-label="Model forecast quantity" hidden><button type="button" data-mammoth-quantity="water" class="active" aria-pressed="true">Snow water</button><button type="button" data-mammoth-quantity="depth" aria-pressed="false">Fresh snow depth</button></div>
+        <div id="comparison-toolbar" class="chart-toolbar"><div id="horizon-buttons" class="horizon-buttons" role="group" aria-label="Forecast horizon"><button data-hours="1">1h</button><button data-hours="3">3h</button><button data-hours="6">6h</button><button data-hours="12">12h</button><button data-hours="24">24h</button><button data-hours="48" class="active" aria-pressed="true">48h</button></div></div>
+        <div id="mammoth-model-detail" hidden>
+          <div class="panel-heading"><div><h3 id="mammoth-model-title">Hourly snow-water forecast</h3><p id="mammoth-model-target" class="panel-subtitle">Jeff Dozier Snow Study Site · 2,936 m</p></div>
+            <div class="segmented" role="group" aria-label="Snow-water chart"><button data-swe-view="hourly" class="active" aria-pressed="true">Hourly</button><button data-swe-view="cumulative" aria-pressed="false">Cumulative</button></div>
+          </div>
+          <div id="swe-chart" class="chart-wrap" aria-live="polite"></div>
+          <p class="chart-caption"><span><i class="legend-line" style="background:#be7c3a"></i>Our model</span><span><i class="legend-line teal-line"></i><span id="swe-reference-name">HRRR</span></span><span id="swe-ecmwf-key" hidden><i class="legend-line" style="background:#507bb6"></i>ECMWF</span></p>
+          <p id="swe-coverage" class="chart-note"></p>
+          <h4>Window total</h4>
+        </div>
         <div id="neural-chart" class="chart-wrap small-chart"></div>
         <div id="neural-legend" class="chart-caption radar-legend"></div>
         <p id="neural-note" class="chart-note"></p>
         <div id="neural-details" class="inline-notes"></div>
-        <p class="chart-note"><a href="/reports/weather/forecast-portfolio/report.html" target="_blank" rel="noopener">Alta 12h, radar &amp; HRRR forecast comparison ↗</a> · <a href="/reports/weather/neural48-trained/report.html" target="_blank" rel="noopener">Previous 48-hour model report ↗</a></p>
+        <p id="other-model-reports" class="chart-note"><a href="/reports/weather/forecast-portfolio/report.html" target="_blank" rel="noopener">Alta 12h, radar &amp; HRRR forecast comparison ↗</a> · <a href="/reports/weather/neural48-trained/report.html" target="_blank" rel="noopener">Previous 48-hour model report ↗</a></p>
+        <p id="mammoth-model-report" class="chart-note" hidden><a href="/reports/mammoth/report.html">Mammoth model evaluation and observed storms ↗</a></p>
       </section>
       <div class="main-grid">
         <section class="panel snow-panel" aria-labelledby="snow-chart-title">
           <div class="panel-heading"><div><p class="eyebrow">Snowfall outlook</p><h3 id="snow-chart-title">A window into the next 48 hours</h3><p class="source-badge" id="hourly-source-badge">External forecast · Open-Meteo</p></div><div class="segmented" role="group" aria-label="Snow chart display"><button class="active" data-view="hourly" aria-pressed="true">Hourly</button><button data-view="cumulative" aria-pressed="false">Cumulative</button></div></div>
-          <div class="chart-toolbar"><span class="chart-zone" id="chart-zone">Mountain local time</span></div>
+          <div class="chart-toolbar" id="provider-toolbar"><span class="chart-zone" id="chart-zone">Mountain local time</span></div>
           <div id="snow-chart" class="chart-wrap" aria-live="polite"></div><div id="snow-tooltip" class="chart-tooltip" role="status" hidden></div><div id="snow-color-legend" class="snow-color-scale" aria-label="Snowfall amount color scale"></div>
           <div class="chart-caption"><span><i class="legend-line teal-line"></i><span id="hourly-model-label">Hourly weather guidance</span></span><span id="snowfall-caption">Fresh snowfall estimate · inches</span></div>
-          <p class="chart-note">This hourly curve is provided by Open-Meteo. The selected model forecast appears in the comparison above.</p>
+          <p class="chart-note" id="provider-chart-note">This hourly curve is provided by Open-Meteo. The selected model forecast appears in the comparison above.</p>
         </section>
-        <section class="panel daily-model-panel" aria-labelledby="daily-title"><div class="panel-heading"><div><p class="eyebrow" id="daily-eyebrow">Trained snowfall model</p><h3 id="daily-title">Daily snowfall estimate</h3></div><span class="round-icon" aria-hidden="true">❄</span></div><p class="panel-subtitle" id="daily-subtitle">Expected snowfall in each complete 24-hour reporting window.</p><div id="daily-cards" class="daily-cards"></div><div id="daily-color-legend" class="snow-color-scale" aria-label="Daily snowfall amount color scale"></div><p class="chart-note" id="daily-model-note">These estimates come from the trained station model using issued GFS weather forecasts.</p></section>
+        <section id="daily-model-panel" class="panel daily-model-panel" aria-labelledby="daily-title"><div class="panel-heading"><div><p class="eyebrow" id="daily-eyebrow">Trained snowfall model</p><h3 id="daily-title">Daily snowfall estimate</h3></div><span class="round-icon" aria-hidden="true">❄</span></div><p class="panel-subtitle" id="daily-subtitle">Expected snowfall in each complete 24-hour reporting window.</p><div id="daily-cards" class="daily-cards"></div><div id="daily-color-legend" class="snow-color-scale" aria-label="Daily snowfall amount color scale"></div><p class="chart-note" id="daily-model-note">These estimates come from the trained station model using issued GFS weather forecasts.</p></section>
+        <div id="mammoth-observations" class="mammoth-observations" hidden>
+        <section class="panel" aria-labelledby="radar-observation-title">
+          <div class="panel-heading"><div><p class="eyebrow">NOAA MRMS · Main Lodge</p><h3 id="radar-observation-title">Radar precipitation rate</h3></div></div>
+          <p class="metric"><span id="radar-rate">—</span><span id="radar-rate-unit" class="metric-unit">mm/h</span></p>
+          <p id="radar-time" class="panel-subtitle"></p><p id="radar-coverage" class="chart-note"></p>
+          <p class="chart-note">Liquid-equivalent precipitation in the radar grid cell nearest Main Lodge. Sierra terrain can obscure the beam.</p>
+        </section>
+        <section class="panel" aria-labelledby="sesame-title">
+          <div class="panel-heading"><div><p class="eyebrow">Mountain observations · 9,014 ft</p><h3 id="sesame-title">Sesame snow study site</h3></div></div>
+          <p id="sesame-time" class="panel-subtitle"></p><dl id="sesame-values" class="station-readings"></dl>
+        </section>
+        </div>
       </div>
       <section class="panel weather-panel" aria-labelledby="weather-title"><div class="panel-heading"><div><p class="eyebrow">External weather forecast · Open-Meteo</p><h3 id="weather-title">Temperature, wind & precipitation</h3></div><span class="subtle" id="weather-period"></span></div><div id="weather-table-wrap" class="weather-table-wrap"></div></section>
 

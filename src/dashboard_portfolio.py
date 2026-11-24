@@ -72,9 +72,36 @@ def _integrate(rows,start,end,key,*,end_key='end',start_key='start'):
     return total
 
 
+def _provider_window(rows, start, end, quantity):
+    """Return the displayed snowfall hours and their sum from one snapshot."""
+    if quantity == 'liquid_precipitation':
+        return _integrate(rows, start, end, 'precipitation_mm', end_key='time'), []
+
+    selected = []
+    for row in rows:
+        left, right = _dt(row['start']), _dt(row['time'])
+        if right > start and left < end:
+            if right - left != timedelta(hours=1) or left < start or right > end:
+                raise ValueError('Snowfall comparison requires whole hourly intervals')
+            selected.append((left, right, row))
+    selected.sort(key=lambda entry: entry[0])
+    cursor = start
+    hours = []
+    for left, right, row in selected:
+        if left != cursor:
+            raise ValueError('Provider snowfall hours are missing or overlap')
+        amount = _number(row.get('snowfall_inches'), required=True)
+        hours.append(dict(row, snowfall_inches=amount, horizon_hours=len(hours) + 1))
+        cursor = right
+    if cursor != end or not hours:
+        raise ValueError('Provider snowfall does not cover the comparison window')
+    return sum(row['snowfall_inches'] for row in hours), hours
+
+
 class Context:
-    def __init__(self,site,now,root):
+    def __init__(self,site,now,root,hourly_forecast=None):
         self.site,self.now,self.root=site,now,root
+        self.hourly_forecast = hourly_forecast or {}
         self.manifest=_document(root/SELECTION)
         self.selection=self.manifest.get('sites',{}).get(site,{})
         self.neural_snapshot=_document(root/'outputs/nwp-weather/neural48-trained/current_forecast.json')
@@ -96,13 +123,35 @@ class Context:
             except OSError:self.cache[name]=[]
         return self.cache[name]
 
-    def provider(self,start,end,quantity):
-        meta=self.neural.get('sources',{}).get('provider',{}).get('best_match') or {}
+    def _check_provider_time(self, meta):
         retrieved=_dt(meta['retrieved_at'])
         if retrieved>self.now or self.now-retrieved>timedelta(hours=6):raise ValueError('Provider snapshot is stale or has a future retrieval time')
+
+    def _same_hourly_target(self):
+        site = self.hourly_forecast.get('site') or {}
+        fields = ('latitude', 'longitude', 'elevation_m')
+        return site.get('id') == self.site and all(
+            self.target.get(key) is not None and site.get(key) == self.target[key] for key in fields
+        )
+
+    def provider(self,start,end,quantity):
+        if quantity == 'snowfall' and self._same_hourly_target():
+            source = self.hourly_forecast.get('source') or {}
+            try:
+                self._check_provider_time(source)
+                amount, hours = _provider_window(self.hourly_forecast.get('hourly') or [], start, end, quantity)
+                return amount, hours, dict(source, series_origin='dashboard_hourly')
+            except (KeyError, TypeError, ValueError):
+                # The model's own provider snapshot may still cover its full window.
+                # Use an entire alternative series, never patch hours across grids.
+                pass
+        meta=self.neural.get('sources',{}).get('provider',{}).get('best_match') or {}
+        self._check_provider_time(meta)
         path=(self.root/meta['path']).resolve()
         if not path.is_relative_to(self.root.resolve()):raise ValueError('Provider source path is outside this project')
-        responses=_load(path)
+        if path not in self.cache:
+            self.cache[path] = _load(path)
+        responses=self.cache[path]
         if not isinstance(responses,list) or len(responses)!=4:raise ValueError('Provider four-site response is unavailable')
         response=responses[SITES.index(self.site)]
         if response.get('utc_offset_seconds') not in (None,0) or response.get('timezone') not in (None,'GMT','UTC'):
@@ -112,13 +161,31 @@ class Context:
         if response.get('hourly_units',{}).get(key)!=unit:raise ValueError('Provider accumulation unit differs')
         hourly=response.get('hourly',{});times=hourly.get('time',[]);values=hourly.get(key,[])
         if len(times)!=len(values):raise ValueError('Provider time/value arrays differ')
+        units = response['hourly_units']
+        def weather_value(field, index, expected_unit):
+            series = hourly.get(field, [])
+            if units.get(field) != expected_unit or len(series) != len(times):
+                return None
+            value = series[index]
+            return value if type(value) in (int, float) and math.isfinite(value) else None
+
         rows=[]
-        for time,value in zip(times,values):
+        for index, time in enumerate(times):
             stamp=datetime.fromisoformat(str(time).replace('Z','+00:00'))
             if stamp.tzinfo is None:stamp=stamp.replace(tzinfo=timezone.utc)
-            amount=_number(value)
-            rows.append({'end':stamp.isoformat(),'amount':None if amount is None else amount/(2.54 if quantity=='snowfall' else 1.)})
-        return _integrate(rows,start,end,'amount'),meta
+            snow = _number(weather_value('snowfall', index, 'cm'))
+            wind = _number(weather_value('wind_speed_10m', index, 'm/s'))
+            rows.append({'start': (stamp - timedelta(hours=1)).isoformat(), 'time': stamp.isoformat(),
+                         'snowfall_inches': None if snow is None else snow / 2.54,
+                         'precipitation_mm': _number(weather_value('precipitation', index, 'mm')),
+                         'temperature_c': weather_value('temperature_2m', index, '°C'),
+                         'wind_kmh': None if wind is None else wind * 3.6})
+        amount, hours = _provider_window(rows, start, end, quantity)
+        source = dict(meta, series_origin='model_target_hourly', grid_latitude=response.get('latitude'),
+                      grid_longitude=response.get('longitude'), elevation_m=response.get('elevation'))
+        if not self._same_hourly_target():
+            source['target_label'] = self.target.get('name')
+        return amount, hours, source
 
 
 def _base(ctx,hours):
@@ -127,7 +194,7 @@ def _base(ctx,hours):
     return dict(hours=hours,start=None,end=None,issued_at=None,status='unavailable',
         quantity=quantity,unit='mm' if quantity=='liquid_precipitation' else 'inches',
         model_name='Our model',method_id=choice.get('method_id'),selected_method_id=choice.get('method_id'),
-        mean=None,lower=None,upper=None,provider_mean=None,interval_label=None,
+        mean=None,lower=None,upper=None,provider_mean=None,provider_hourly=[],interval_label=None,
         stale=False,window_started=False,expired=False,warnings=[],sources={},target=ctx.target,
         hourly_validated=False,selection=choice)
 
@@ -150,8 +217,8 @@ def _ready(record,ctx,mean,lower=None,upper=None,interval=None):
         raise ValueError('Forecast uncertainty range is reversed')
     record['interval_label']=interval;record['status']='ready'
     try:
-        value,meta=ctx.provider(_dt(record['start']),_dt(record['end']),record['quantity'])
-        record['provider_mean']=value;record['sources']['provider']=meta
+        value,hours,meta=ctx.provider(_dt(record['start']),_dt(record['end']),record['quantity'])
+        record['provider_mean']=value;record['provider_hourly']=hours;record['sources']['provider']=meta
     except (KeyError,ValueError,TypeError) as exc:
         record['warnings'].append('Matched provider comparison unavailable: '+str(exc))
     return record
@@ -291,11 +358,11 @@ def _portfolio24(ctx,record):
     return _ready(record,ctx,mean,None if spread is None else max(0,mean-spread),None if spread is None else mean+spread,'Descriptive 80% validation residual range')
 
 
-def read_deployed(site,now=None,root=None):
+def read_deployed(site,now=None,root=None,hourly_forecast=None):
     if site not in SITES:raise ValueError('Unknown mountain')
     now=now or datetime.now(timezone.utc)
     if now.tzinfo is None:raise ValueError('Current time must include a timezone')
-    ctx=Context(site,now.astimezone(timezone.utc),Path(root or ROOT))
+    ctx=Context(site,now.astimezone(timezone.utc),Path(root or ROOT),hourly_forecast=hourly_forecast)
     records=[]
     for hours in HORIZONS:
         record=_base(ctx,hours)

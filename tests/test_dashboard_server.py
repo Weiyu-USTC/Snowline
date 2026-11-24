@@ -34,8 +34,16 @@ class DashboardServerTests(unittest.TestCase):
         for headers in ({'Origin':'https://example.com'},{'Host':'attacker.example'}):
             self.assertEqual(self.request('GET','/api/health',headers=headers)[0],403)
     def test_unknown_site_and_path_traversal_rejected(self):
-        for path,status in [('/api/forecast?site=unsupported',400),('/reports/alta/../../../../etc/passwd',404),('/reports/alta/%2e%2e/%2e%2e/README.md',404),('/src/serve_snow_dashboard.py',404)]:
+        for path,status in [('/api/forecast?site=unsupported',400),('/api/season?site=unsupported',400),('/reports/alta/../../../../etc/passwd',404),('/reports/alta/%2e%2e/%2e%2e/README.md',404),('/src/serve_snow_dashboard.py',404)]:
             self.assertEqual(self.request('GET',path)[0],status)
+    def test_season_endpoint_reads_each_site_without_starting_refresh(self):
+        get_season=Mock(side_effect=lambda site:{'site_id':site,'history':[],'current':{},'forecast':{'status':'unavailable'}})
+        with patch.dict(sys.modules,{'dashboard_season':SimpleNamespace(get_season=get_season)}),patch.object(dashboard,'WORKER') as worker:
+            for site in sorted(dashboard.SITES):
+                status,payload=self.request('GET','/api/season?site='+site)
+                self.assertEqual(status,200);self.assertEqual(payload['site_id'],site)
+            worker.submit.assert_not_called()
+        self.assertEqual(get_season.call_count,len(dashboard.SITES))
     def test_refresh_shape_and_media_type_rejected(self):
         cases=[('/api/refresh',{'site':'alta'}, {},415),('/api/refresh',{'site':'unknown'},{'Content-Type':'application/json'},400),('/api/refresh',{'site':'alta','include_radar':'yes'},{'Content-Type':'application/json'},400),('/api/refresh',{'site':'alta','command':'bad'},{'Content-Type':'application/json'},400),('/api/refresh-all',[],{'Content-Type':'application/json'},400),('/api/refresh-all',{'command':'bad'},{'Content-Type':'application/json'},400)]
         with patch.object(dashboard,'WORKER') as worker:
@@ -45,19 +53,19 @@ class DashboardServerTests(unittest.TestCase):
         with patch.object(dashboard,'WORKER') as worker:
             status,first=self.request('POST','/api/refresh-all',{}, {'Content-Type':'application/json'})
             self.assertEqual(status,202);self.assertEqual(first['site'],'all');self.assertTrue(first['include_radar'])
-            self.assertEqual(set(first['sites']),dashboard.SITES)
+            self.assertEqual(set(first['sites']),set(dashboard.SITES))
             for site in dashboard.SITES:self.assertEqual(first['job_id'],dashboard.start_refresh(site,False)['job_id'])
             self.assertEqual(worker.submit.call_count,1)
             status,payload=self.request('GET','/api/jobs/'+first['job_id'])
             self.assertEqual(status,200);self.assertEqual(payload['status'],'queued')
-    def test_partial_source_failure_keeps_four_site_results(self):
+    def test_partial_source_failure_keeps_all_site_results(self):
         outcome={'status':'partial','sources':{'hrrr':{'status':'failed'},'nexrad_models':{'status':'succeeded'}},'errors':[{'source':'hrrr','message':'retained dated forecast'}]}
         module=SimpleNamespace(refresh_all=Mock(return_value=outcome))
         read=lambda site:{'site':{'id':site},'status':'ready','deployed':{'status':'ready'}}
         with patch.dict(sys.modules,{'refresh_deployed_forecasts':module}),patch.object(dashboard,'WORKER'),patch.object(dashboard,'read_forecast',side_effect=read):
             job=dashboard.start_refresh_all();dashboard.run_refresh_all(job['job_id']);result=dashboard.JOBS[job['job_id']]
-            self.assertEqual(result['status'],'partial');self.assertEqual(result['completed_sites'],4)
-            self.assertEqual(set(result['results']),dashboard.SITES)
+            self.assertEqual(result['status'],'partial');self.assertEqual(result['completed_sites'],len(dashboard.SITES))
+            self.assertEqual(set(result['results']),set(dashboard.SITES))
             self.assertFalse(result['retrained']);module.refresh_all.assert_called_once()
     def test_failed_batch_does_not_destroy_readable_cache(self):
         cached={'site':{'id':'vail'},'status':'cached','hourly':[{'time':'2026-11-06T16:00Z'}]}

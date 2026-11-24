@@ -20,9 +20,10 @@ from urllib.request import urlopen
 import uuid
 import webbrowser
 
+from snowline_sites import SITES
+
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / 'dashboard'
-SITES = {'alta', 'vail', 'mansfield', 'jay'}
 JOBS = {}
 LOCK = threading.RLock()
 WORKER = ThreadPoolExecutor(max_workers=1, thread_name_prefix='forecast-refresh')
@@ -52,10 +53,21 @@ def attach_neural48(payload):
 
 def read_forecast(site):
     from dashboard_forecasts import get_forecast
-    payload=attach_neural48(attach_radar(get_forecast(site, refresh=False)))
+    payload = get_forecast(site, refresh=False)
+    if site == 'mammoth':
+        from mammoth_radar import read_current_radar
+        from mammoth_observations import read_sesame_observation
+        payload['radar_observation'] = read_current_radar(ROOT)
+        payload['sesame_observation'] = read_sesame_observation(ROOT)
+        from mammoth_forecast import read_deployed_mammoth
+        payload['deployed'] = read_deployed_mammoth(ROOT)
+        if payload.get('status') == 'unavailable' and payload['deployed'].get('status') != 'unavailable':
+            payload['status'] = 'partial'
+        return payload
+    payload = attach_neural48(attach_radar(payload))
     try:
         from dashboard_portfolio import read_deployed
-        payload['deployed']=read_deployed(site)
+        payload['deployed']=read_deployed(site, hourly_forecast=payload)
         if payload.get('status')=='unavailable' and payload['deployed'].get('status')!='unavailable':
             payload['status']='partial'
     except Exception as exc:
@@ -71,7 +83,7 @@ def set_job(job_id, **changes):
 
 def run_refresh_all(job_id):
     try:
-        set_job(job_id,status='running',message='Updating radar, HRRR and the models for all four mountains…')
+        set_job(job_id,status='running',message='Updating mountain weather, radar and available models…')
         from refresh_deployed_forecasts import refresh_all
         def progress(message,source=None,source_status=None):
             with LOCK:
@@ -79,7 +91,7 @@ def run_refresh_all(job_id):
                 if source:job.setdefault('sources',{})[source]={'status':source_status,'message':str(message)}
         outcome=refresh_all(progress=progress)
         results={};errors=list(outcome.get('errors',[]))
-        for site in ['alta','vail','mansfield','jay']:
+        for site in SITES:
             try:results[site]=read_forecast(site)
             except Exception as exc:
                 results[site]={'site':{'id':site},'status':'unavailable','errors':[str(exc)]}
@@ -87,7 +99,7 @@ def run_refresh_all(job_id):
         status=outcome['status']
         if errors and status=='succeeded':status='partial'
         if all(r.get('status')=='unavailable' for r in results.values()):status='failed'
-        message='All four mountains updated.' if status=='succeeded' else outcome.get('message','Some sources could not update. Available forecasts and their original times are shown.')
+        message='All mountains updated.' if status=='succeeded' else outcome.get('message','Some sources could not update. Available forecasts and their original times are shown.')
         result={'sites':results,'sources':outcome.get('sources',{}),'errors':errors,'status':status}
         set_job(job_id,status=status,message=message,result=result,results=results,
                 sources=outcome.get('sources',{}),errors=errors,completed_sites=len(results),retrained=False)
@@ -110,7 +122,7 @@ def start_refresh_all():
         for old in done[:-16]:
             JOBS.pop(old['job_id'], None)
         job_id = uuid.uuid4().hex
-        JOBS[job_id] = {'job_id': job_id, 'site':'all','sites':['alta','vail','mansfield','jay'], 'include_radar':True,
+        JOBS[job_id] = {'job_id': job_id, 'site':'all','sites':list(SITES), 'include_radar':True,
                         'status': 'queued', 'message': 'Waiting for the current refresh to finish…',
                         'created_at': utc_now(), 'updated_at': utc_now(),'sources':{},'completed_sites':0}
         response = dict(JOBS[job_id])
@@ -119,7 +131,7 @@ def start_refresh_all():
 
 
 def start_refresh(site,include_radar=False):
-    if site not in SITES:raise ValueError('Choose one of the four supported mountains.')
+    if site not in SITES:raise ValueError('Choose a supported mountain.')
     return start_refresh_all()
 
 
@@ -173,6 +185,12 @@ class Handler(BaseHTTPRequestHandler):
                 if site not in SITES:
                     return self.respond_json({'error': 'Unknown mountain.'}, 400)
                 return self.respond_json(read_forecast(site))
+            if url.path == '/api/season':
+                site = parse_qs(url.query).get('site', ['alta'])[0]
+                if site not in SITES:
+                    return self.respond_json({'error': 'Unknown mountain.'}, 400)
+                from dashboard_season import get_season
+                return self.respond_json(get_season(site))
             if url.path.startswith('/api/jobs/'):
                 key = url.path.removeprefix('/api/jobs/')
                 with LOCK:
@@ -185,6 +203,12 @@ class Handler(BaseHTTPRequestHandler):
             filename = {'/': 'index.html', '/index.html': 'index.html', '/app.js': 'app.js', '/styles.css': 'styles.css'}.get(url.path)
             if filename:
                 file = STATIC / filename
+            elif url.path in {'/reports/mammoth/report.html', '/reports/mammoth/validation.png',
+                              '/reports/mammoth/metrics.csv'}:
+                name = url.path.rsplit('/', 1)[1]
+                file = ROOT / 'outputs/mammoth-hourly' / name
+                if not file.is_file():
+                    file = ROOT / 'artifacts/mammoth-hourly' / name
             elif url.path.startswith('/reports/alta/') or url.path.startswith('/reports/weather/'):
                 category, tail = url.path[len('/reports/'):].split('/', 1)
                 directory = ROOT / 'outputs' / ('alta-nowcast' if category == 'alta' else 'nwp-weather')

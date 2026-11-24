@@ -96,4 +96,76 @@ class RefreshTests(unittest.TestCase):
         self.assertEqual(jay['deployed_48']['mean_inches'],30.)
         self.assertEqual(jay['deployed_48']['family'],'weather_radar')
 
+class CollinsFeedTests(unittest.TestCase):
+    def setUp(self):
+        import pandas as pd
+        import prepare_mountain_hourly as mountain
+
+        self.mountain = mountain
+        self.root = Path(self.enterContext(tempfile.TemporaryDirectory())).resolve()
+        self.raw = self.root / 'raw'
+        self.raw.mkdir()
+        self.cache = self.raw / 'alta_cln_current.html'
+        self.record_time = pd.Timestamp.now(tz='UTC').floor('h') - pd.Timedelta(hours=1)
+        self.original = self.station_table(self.record_time - pd.Timedelta(hours=2)).encode()
+        self.cache.write_bytes(self.original)
+        self.enterContext(patch.object(mountain, 'ROOT', self.root))
+        self.enterContext(patch.object(mountain, 'RAW', self.raw))
+        self.primary = self.enterContext(patch.object(mountain.requests, 'get'))
+        self.fallback = self.enterContext(patch('alta_collins_fallback.fetch_collins_fallback'))
+        self.fallback.return_value = pd.DataFrame([{
+            'station_id': 'CLN', 'valid_time_utc': self.record_time, 'temperature_c': -3.0,
+        }])
+
+    @staticmethod
+    def station_table(time):
+        stamp = time.strftime('%m/%d/%Y %H:%M')
+        return (f'<a href="?stn=CLN">Collins</a><p>Tabular Listing of 1 Observations '
+                f'from {stamp} GMT to {stamp} GMT</p><table>'
+                '<tr><th>Time (GMT)</th><th>Temperature ° F</th></tr>'
+                f'<tr><td>{time:%H:%M}</td><td>14</td></tr></table>')
+
+    def set_response_html(self, html):
+        self.primary.return_value.text = html
+        self.primary.return_value.content = html.encode()
+
+    def test_primary_route_failure_uses_alta_and_keeps_cached_station_table(self):
+        self.primary.side_effect = self.mountain.requests.ConnectionError('No route to host')
+        result = self.mountain.fetch_current_collins(timeout=2)
+        self.assertEqual(result.attrs['feed'], 'Alta Ski Area')
+        self.assertIn('No route to host', result.attrs['primary_error'])
+        self.assertEqual(result.valid_time_utc.iloc[0], self.record_time)
+        self.assertEqual(self.cache.read_bytes(), self.original)
+
+    def test_unusable_or_stale_primary_table_is_rejected_before_cache_replacement(self):
+        from datetime import timedelta
+        for body in ('<p>stn=CLN: maintenance</p>', self.station_table(self.record_time - timedelta(days=2))):
+            with self.subTest(body=body):
+                self.set_response_html(body)
+                result = self.mountain.fetch_current_collins(timeout=2)
+                self.assertEqual(result.attrs['feed'], 'Alta Ski Area')
+                self.assertTrue(result.attrs['primary_error'])
+                self.assertEqual(self.cache.read_bytes(), self.original)
+                self.assertEqual(list(self.raw.iterdir()), [self.cache])
+
+    def test_both_feeds_fail_without_promoting_stale_data(self):
+        self.primary.side_effect = self.mountain.requests.ConnectionError('Primary unavailable')
+        self.fallback.side_effect = ValueError('Secondary unavailable')
+        with self.assertRaises(ValueError) as failure:
+            self.mountain.fetch_current_collins(timeout=2)
+        self.assertIn('Primary unavailable', str(failure.exception))
+        self.assertIn('Secondary unavailable', str(failure.exception))
+        self.assertEqual(self.cache.read_bytes(), self.original)
+
+    def test_valid_primary_refresh_preserves_source_time_and_avoids_fallback(self):
+        body = self.station_table(self.record_time)
+        self.set_response_html(body)
+        result = self.mountain.fetch_current_collins(timeout=2)
+        self.assertEqual(result.attrs['feed'], 'MesoWest')
+        self.assertEqual(result.valid_time_utc.iloc[0], self.record_time)
+        self.assertEqual(result.temperature_c.iloc[0], -10)
+        self.assertEqual((self.root / result.source_file.iloc[0]).read_bytes(), body.encode())
+        self.fallback.assert_not_called()
+
+
 if __name__=='__main__':unittest.main()

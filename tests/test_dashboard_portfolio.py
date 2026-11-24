@@ -3,6 +3,8 @@ from datetime import datetime,timedelta,timezone
 import csv,json
 from pathlib import Path
 import sys,tempfile,unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'src'))
 from dashboard_portfolio import read_deployed,deployment_neural48_families,_integrate
 
@@ -76,6 +78,84 @@ class DeploymentTests(unittest.TestCase):
         self.assertIsNone(r['upper']);self.assertEqual(r['quantity'],'liquid_precipitation')
     def test_snow_provider_is_converted_cm_to_inches_once(self):
         r=self.horizon('vail',6);self.assertEqual(r['mean'],6);self.assertAlmostEqual(r['provider_mean'],6)
+    def provider_snapshots(self, site, target, display_location):
+        # The single-site Vail fetch returned 2.66 cm, the batched nearest
+        # grid cell returned 1.33 cm over precisely the same 48 endpoints.
+        self.neural['sites'][site]['target'].update(target)
+        self.write('outputs/nwp-weather/neural48-trained/current_forecast.json', self.neural)
+        provider = json.loads((self.root / 'data/provider.json').read_text())
+        batch = provider[SITES.index(site)]
+        for i, value in enumerate(batch['hourly']['time']):
+            lead = int((datetime.fromisoformat(value).replace(tzinfo=UTC) - START).total_seconds() / 3600)
+            batch['hourly']['snowfall'][i] = {1: .28, 2: .28, 3: .28, 4: .49}.get(lead, 0.)
+        self.write('data/provider.json', provider)
+        amounts_cm = [.28] * 6 + [.49] * 2 + [0.] * 40
+        rows = [dict(start=(START + timedelta(hours=i)).isoformat(),
+                     time=(START + timedelta(hours=i + 1)).isoformat(),
+                     snowfall_inches=cm / 2.54, precipitation_mm=3.5,
+                     temperature_c=-2., wind_kmh=10.) for i, cm in enumerate(amounts_cm)]
+        return dict(site=dict(id=site, **display_location), status='ready', hourly=rows,
+                    source=dict(name='Open-Meteo hourly weather guidance', sha256='single-site-digest',
+                                retrieved_at=NOW.isoformat(), stale=False,
+                                url='https://api.open-meteo.com/v1/forecast'))
+
+    def assert_provider_window(self, record, expected_cm):
+        self.assertAlmostEqual(record['provider_mean'] * 2.54, expected_cm)
+        rows = record['provider_hourly']
+        self.assertEqual(len(rows), record['hours'])
+        self.assertAlmostEqual(sum(row['snowfall_inches'] for row in rows), record['provider_mean'])
+        self.assertEqual(datetime.fromisoformat(rows[0]['start']), datetime.fromisoformat(record['start']))
+        self.assertEqual(datetime.fromisoformat(rows[-1]['time']), datetime.fromisoformat(record['end']))
+        for left, right in zip(rows, rows[1:]):
+            self.assertEqual(datetime.fromisoformat(left['time']), datetime.fromisoformat(right['start']))
+
+    def test_public_forecast_uses_one_vail_snapshot_for_bar_and_histogram(self):
+        import dashboard_portfolio
+        import serve_snow_dashboard
+        location = dict(latitude=39.6176, longitude=-106.38, elevation_m=3140)
+        hourly = self.provider_snapshots('vail', location, location)
+        # Exercise the same handler implementation that both clients call.
+        def deployment_for_fixture(site, **kwargs):
+            return read_deployed(site, now=NOW, root=self.root, **kwargs)
+        source = SimpleNamespace(get_forecast=lambda site, refresh: hourly)
+        with patch.dict(sys.modules, {'dashboard_forecasts': source}), \
+                patch.object(serve_snow_dashboard, 'attach_neural48', side_effect=lambda value: value), \
+                patch.object(dashboard_portfolio, 'read_deployed', side_effect=deployment_for_fixture):
+            response = serve_snow_dashboard.read_forecast('vail')
+        record = next(row for row in response['deployed']['horizons'] if row['hours'] == 48)
+        self.assert_provider_window(record, 2.66)
+        self.assertEqual(record['mean'], 20.)
+        self.assertEqual(record['sources']['provider']['sha256'], 'single-site-digest')
+
+    def test_other_observation_location_keeps_its_matching_station_series(self):
+        town = dict(latitude=44.464, longitude=-72.6907, elevation_m=223.1)
+        mountain = dict(latitude=44.5247, longitude=-72.8153, elevation_m=1204)
+        hourly = self.provider_snapshots('mansfield', town, mountain)
+        response = read_deployed('mansfield', now=NOW, root=self.root, hourly_forecast=hourly)
+        record = next(row for row in response['horizons'] if row['hours'] == 48)
+        self.assert_provider_window(record, 1.33)
+
+    def test_incomplete_dashboard_hours_cannot_be_silently_mixed_with_batch(self):
+        location = dict(latitude=39.6176, longitude=-106.38, elevation_m=3140)
+        hourly = self.provider_snapshots('vail', location, location)
+        # Duplicate hour one and omit hour two, preserving the nominal count.
+        hourly['hourly'][1] = hourly['hourly'][0].copy()
+        response = read_deployed('vail', now=NOW, root=self.root, hourly_forecast=hourly)
+        record = next(row for row in response['horizons'] if row['hours'] == 48)
+        self.assertEqual(record['mean'], 20.)
+        self.assert_provider_window(record, 1.33)
+
+        # A missing value in the backup cannot be repaired using the other grid.
+        batch = json.loads((self.root / 'data/provider.json').read_text())
+        final_end = (START + timedelta(hours=48)).replace(tzinfo=None).isoformat()
+        fields = batch[SITES.index('vail')]['hourly']
+        fields['snowfall'][fields['time'].index(final_end)] = None
+        self.write('data/provider.json', batch)
+        response = read_deployed('vail', now=NOW, root=self.root, hourly_forecast=hourly)
+        record = next(row for row in response['horizons'] if row['hours'] == 48)
+        self.assertEqual(record['mean'], 20.)
+        self.assertIsNone(record['provider_mean'])
+        self.assertFalse(record.get('provider_hourly'))
     def test_alta12_is_exact_fixed_target_window(self):
         r=self.horizon('alta',12);self.assertEqual(r['mean'],.7);self.assertEqual(r['method_id'],'actual_alta12_method')
         self.alta12['alta12']['start']=(START+timedelta(hours=1)).isoformat();self.alta12['alta12']['end']=(START+timedelta(hours=13)).isoformat();self.write('outputs/nwp-weather/forecast-portfolio/current_forecast.json',self.alta12)

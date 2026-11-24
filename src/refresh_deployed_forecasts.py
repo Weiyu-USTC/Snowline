@@ -20,17 +20,24 @@ import tempfile
 import time
 import uuid
 
+from snowline_sites import SITES
+
 ROOT = Path(__file__).resolve().parents[1]
-SITES = ('alta', 'vail', 'mansfield', 'jay')
 OUT = ROOT/'outputs/dashboard/deployed-refresh'
 LATEST = OUT/'latest.json'
 STAGES = {
-    'providers': ('default', 360, 'Updating weather forecasts for all four mountains…'),
-    'hrrr': ('hrrr', 420, 'Updating hourly HRRR forecasts for all four mountains…'),
+    'mammoth_provider': ('default', 120, 'Fetching ECMWF snow-water forecasts for Mammoth…'),
+    'mammoth_weather': ('hrrr', 180, 'Fetching HRRR forecasts for the Jeff Dozier Snow Study Site…'),
+    'mammoth_model': ('default', 90, 'Running the hourly Mammoth snowfall model…'),
+    'mammoth_radar': ('default', 150, 'Updating NOAA radar at Mammoth Mountain…'),
+    'mammoth_observations': ('default', 90, 'Updating Main Lodge snowfall reports…'),
+    'providers': ('default', 360, 'Updating weather forecasts for all mountains…'),
+    'hrrr': ('hrrr', 420, 'Updating hourly HRRR forecasts for the four modeled mountains…'),
     'nexrad_acquisition': ('nexrad', 360, 'Downloading radar near Alta, Vail, Stowe and Jay Peak…'),
     'observations': ('default', 150, 'Reading the latest mountain observations…'),
+    'seasonal_observations': ('default', 150, 'Updating seasonal snowfall observations…'),
     'alta_radar': ('hrrr', 280, 'Updating the saved Alta radar models…'),
-    'neural48': ('default', 480, 'Running the selected 48-hour models for all four mountains…'),
+    'neural48': ('default', 480, 'Running the selected 48-hour models for the four modeled mountains…'),
     'nexrad_models': ('nexrad', 360, 'Combining the new radar and HRRR forecasts…'),
     'temperature': ('default', 120, 'Refining mountain temperatures with the saved models…'),
     'portfolio': ('default', 150, 'Updating the deployed forecasts and comparison report…'),
@@ -115,7 +122,7 @@ def run_stage(name, folder, progress=None, deadline=None):
 
 
 def refresh_all(progress=None):
-    """Exactly one shared acquisition per source, even for four UI mountains."""
+    """One shared acquisition per source for the whole collection."""
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')+'-'+uuid.uuid4().hex[:8]
     folder = OUT/stamp; folder.mkdir(parents=True, exist_ok=True)
     started = now(); sources = {};deadline=time.monotonic()+15*60
@@ -128,8 +135,9 @@ def refresh_all(progress=None):
                 except Exception as exc: sources[name] = {'source':name,'status':'failed','message':str(exc),'errors':[str(exc)]}
     # The first group writes disjoint source caches. Model inference follows
     # only after those acquisitions finish, so there is no cross-source race.
-    group(['providers', 'hrrr', 'nexrad_acquisition', 'observations'])
-    group(['neural48', 'nexrad_models', 'temperature'])
+    group(['providers', 'hrrr', 'nexrad_acquisition', 'observations', 'seasonal_observations',
+           'mammoth_radar', 'mammoth_weather', 'mammoth_provider', 'mammoth_observations'])
+    group(['mammoth_model', 'neural48', 'nexrad_models', 'temperature'])
     # Issue the shortest window last so it is still useful when the UI opens.
     sources['alta_radar']=run_stage('alta_radar',folder,progress,deadline)
     # Do not finish a batch with a now-started full-day neural window. This
@@ -149,10 +157,19 @@ def refresh_all(progress=None):
               for name,item in sources.items() if item['status'] in {'failed','partial'}]
     successes = sum(item['status']=='succeeded' for item in sources.values())
     status = 'succeeded' if not errors else 'partial' if successes else 'failed'
-    labels={'hrrr':'HRRR','nexrad_acquisition':'radar downloads','nexrad_models':'short-range radar',
+    labels={'mammoth_provider':'Mammoth ECMWF','mammoth_model':'Mammoth hourly model','mammoth_weather':'Mammoth HRRR',
+            'mammoth_radar':'Mammoth radar','mammoth_observations':'Mammoth snowfall reports',
+            'hrrr':'HRRR','nexrad_acquisition':'radar downloads','nexrad_models':'short-range radar',
             'providers':'weather providers','neural48':'48-hour models','alta_radar':'Alta radar',
-            'observations':'mountain observations','temperature':'temperature corrections','portfolio':'forecast comparison'}
-    summary = ('All four mountains updated.' if not errors else
+            'observations':'mountain observations','seasonal_observations':'seasonal snowfall observations',
+            'temperature':'temperature corrections','portfolio':'forecast comparison'}
+    station_labels = {'CLN': 'Alta Collins', '842:CO:SNTL': 'Vail SNOTEL', 'FEMC_MMW': 'Stowe FEMC'}
+    missing_stations = [station_labels.get(station, station)
+                        for station, state in sources.get('observations', {}).get('stations', {}).items()
+                        if state.get('status') == 'failed']
+    if missing_stations:
+        labels['observations'] = ' and '.join(missing_stations) + ' observations'
+    summary = ('All mountains updated.' if not errors else
                'Some sources could not update: '+', '.join(labels.get(e['source'],e['source']) for e in errors)+'. Available forecasts are shown.')
     payload = {'status':status, 'started_at':started, 'completed_at':now(), 'sites':list(SITES),
                'sources':sources, 'errors':errors, 'retrained':False,
@@ -178,7 +195,7 @@ def providers_stage():
                     errors.append(f"{site}: "+'; '.join(data.get('errors',[]) or data.get('warnings',[]) or ['Some weather sources were retained.']))
             except Exception as exc:
                 results[site]={'status':'failed','error':str(exc)};errors.append(f'{site}: {exc}')
-    return {'status':'partial' if errors else 'succeeded','message':'Weather providers updated for all four mountains.' if not errors else 'Some weather-provider data could not update.', 'sites':results,'errors':errors}
+    return {'status':'partial' if errors else 'succeeded','message':'Weather providers updated for all mountains.' if not errors else 'Some weather-provider data could not update.', 'sites':results,'errors':errors}
 
 
 def hrrr_stage():
@@ -194,7 +211,7 @@ def hrrr_stage():
         try: hrrr.fetch_run(run)
         except Exception as exc: alta_error=str(exc)
     return {'status':'partial' if info.get('fallback_run') or alta_error else 'succeeded',
-            'message':'HRRR updated for all four mountains.', 'forecast':info,
+            'message':'HRRR updated for the four modeled mountains.', 'forecast':info,
             'alta12_scheduled_cycle_available':bool(run+pd.Timedelta(hours=3)<=issue),
             'errors':([alta_error] if alta_error else [])+info.get('attempt_errors',[])}
 
@@ -206,7 +223,7 @@ def nexrad_acquisition_stage():
     finally:sys.argv=previous
     rows=json.loads((ROOT/'data/nexrad_short/current_acquisition.json').read_text())
     errors=[f"{r['site']}: {r.get('error','Radar unavailable')}" for r in rows if r['status']!='ok']
-    return {'status':'partial' if errors else 'succeeded','message':'Radar downloads checked for all four mountains.',
+    return {'status':'partial' if errors else 'succeeded','message':'Radar downloads checked for the four modeled mountains.',
             'radars':['KMTX','KFTG','KGJX','KCXX'],'acquisitions':rows,'errors':errors}
 
 
@@ -219,18 +236,61 @@ def observations_stage():
         for future in as_completed(tasks):
             station=tasks[future]
             try:
-                d=future.result();frames.append(d);details[station]={'status':'succeeded','rows':len(d),'latest_valid_time_utc':str(d.valid_time_utc.max())}
+                d = future.result()
+                frames.append(d)
+                details[station] = {'status': 'succeeded', 'rows': len(d),
+                                    'latest_valid_time_utc': str(d.valid_time_utc.max())}
+                if station == 'CLN':
+                    details[station].update(feed=d.attrs.get('feed'),
+                                            fields=[c for c in ('temperature_c','precipitation_mm','wet_bulb_c','snow_depth_cm') if d[c].notna().any()])
+                    if 'primary_error' in d.attrs:
+                        details[station]['primary_error'] = d.attrs['primary_error']
             except Exception as exc:details[station]={'status':'failed','error':str(exc)};errors.append(f'{station}: {exc}')
     if frames:
         fresh=pd.concat(frames,ignore_index=True);atomic_frame(ROOT/'data/mountain_hourly/current_observations.csv.gz',fresh)
         previous=pd.read_csv(path,low_memory=False) if path.exists() else pd.DataFrame()
         combined=pd.concat([previous,fresh],ignore_index=True)
         combined['valid_time_utc']=pd.to_datetime(combined.valid_time_utc,utc=True)
+        # Keep richer MesoWest rows when the resort reports the same station-hour.
+        if details.get('CLN', {}).get('feed') == 'Alta Ski Area':
+            primary = combined.station_id.eq('CLN') & combined.source_url.str.startswith('https://mesowest.utah.edu/', na=False)
+            redundant = combined.station_id.eq('CLN') & combined.source_url.eq('https://www.alta.com/weather') & combined.valid_time_utc.isin(combined.loc[primary, 'valid_time_utc'])
+            combined = combined.loc[~redundant]
         combined=combined.drop_duplicates(['station_id','valid_time_utc'],keep='last').sort_values(['station_id','valid_time_utc'])
         atomic_frame(path,combined)
     return {'status':'partial' if errors and frames else 'failed' if errors else 'succeeded',
             'message':'Mountain observations checked.', 'stations':details,'errors':errors,
             'jay':'No verified summit observation source; regional weather remains explicitly separate.'}
+
+
+def mammoth_provider_stage():
+    from mammoth_weather import refresh_provider
+    return refresh_provider(ROOT)
+
+
+def mammoth_weather_stage():
+    from mammoth_weather import refresh_current
+    return refresh_current(ROOT)
+
+
+def mammoth_model_stage():
+    from mammoth_forecast import refresh_mammoth_model
+    return refresh_mammoth_model(ROOT)
+
+
+def mammoth_observations_stage():
+    from mammoth_observations import refresh_mammoth_observations
+    return refresh_mammoth_observations(ROOT)
+
+
+def mammoth_radar_stage():
+    from mammoth_radar import fetch_current_radar
+    return fetch_current_radar(ROOT)
+
+
+def seasonal_observations_stage():
+    from season_observations import refresh_observations
+    return refresh_observations(root=ROOT)
 
 
 def alta_radar_stage():

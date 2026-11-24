@@ -1,0 +1,410 @@
+{
+  "version": 1,
+  "family": "Weather + radar ridge 0.3",
+  "target": "Jeff Dozier Parsivel2 frozen precipitation water equivalent, mm",
+  "uses_radar": true,
+  "estimator": {
+    "features": 20,
+    "center": [
+      0.16713250866721646,
+      0.12136979257287558,
+      0.18293612711395177,
+      0.18127579904629332,
+      -3.279509393857253,
+      0.16693750200687002,
+      1.3670856646502187,
+      0.44285432075704434,
+      0.5311836703835306,
+      -0.005572220415575768,
+      0.00023891407023688565,
+      0.5090396614608184,
+      0.5344556124558669,
+      0.13429975508126848,
+      0.0306451573180846,
+      0.00040284318337071364,
+      0.0007148566112163843,
+      0.0008929106826532944,
+      0.0024428898534624975,
+      0.010875583980634283
+    ],
+    "spread": [
+      0.7439383666973043,
+      0.39038683650734474,
+      0.791224016020068,
+      0.7873545151621717,
+      5.414365529443133,
+      0.7028658923814379,
+      1.053166674177151,
+      0.5660525979564038,
+      0.44867406349294475,
+      0.7077071245106396,
+      0.7064839129072981,
+      0.28860567252538566,
+      1.57864665365478,
+      0.3409740911954633,
+      0.10874394251357807,
+      0.018367238442919143,
+      0.021083005687092073,
+      0.021606806125964138,
+      0.0438074010322017,
+      0.03987669748389166
+    ],
+    "kind": "ridge",
+    "weights": [
+      0.9101002315133216,
+      0.8910648625394926,
+      0.8253902688895758,
+      0.8595264486289975,
+      -0.18667145302067154,
+      1.6794294187519083,
+      0.2373699618767062,
+      -0.07131326134516221,
+      -0.04517446908723387,
+      0.006001051229620108,
+      -0.19576073006651454,
+      -0.0025042878813388613,
+      0.1328262760423495,
+      -0.01918112839872782,
+      -0.01866552924902815,
+      0.04223096431610064,
+      0.12013167811697006,
+      0.014096126214904806,
+      0.1869612367619574,
+      -0.017614415575548704
+    ],
+    "intercept": 1.534810666895055
+  },
+  "monthly_means_mm": [
+    1.346907471067842,
+    0.6704971870902579,
+    1.134559756085706,
+    0.9833660718288659,
+    0.23185817020149835,
+    0.03534507469273536,
+    0.03130460102145821,
+    0.029142490443929133,
+    0.0394662995401705,
+    0.8369606900708053,
+    0.4360016121753473,
+    3.9575042400423013
+  ],
+  "input_sha256": {
+    "history.csv.gz": "219c2cb941418db8c7105c13113189f4dca892438b546319bcdc4ad8fe868d14",
+    "cues_disdrometer_hourly.csv.gz": "1654efb1a370e9b8b385de83a661dd92756121efe626b0a4669738380c6e6241",
+    "historical_points.csv": "3889288425e8d8804a6c8f91ed008c2dfb2551f2866d0f71df3eb0c000d35dbc"
+  },
+  "feature_order": [
+    "native_snow_swe_or_tail",
+    "sqrt_snow_swe",
+    "total_precip",
+    "cold_phase_precip",
+    "temperature_c",
+    "five_hour_smooth_snow",
+    "monthly_target_mean",
+    "annual_sin",
+    "annual_cos",
+    "hour_sin",
+    "hour_cos",
+    "lead_over_48",
+    "extrapolated_hours",
+    "extrapolated_flag",
+    "point_available_decay",
+    "radar_point_decay",
+    "radar_local_decay",
+    "radar_regional_decay",
+    "radar_west_decay",
+    "radar_quality_decay"
+  ],
+  "selection": {
+    "rule": "Lowest average validation RMSE relative to monthly climatology across six accumulation horizons",
+    "scores": {
+      "Calendar climatology": 1.0,
+      "HRRR with tail persistence": 0.9543004697213036,
+      "Calibrated HRRR": 0.5655525388406188,
+      "Power-calibrated HRRR 0.75": 0.5689782534700336,
+      "Power-calibrated HRRR 1.25": 0.57943895461416,
+      "Calibrated HRRR + radar update": 0.5576015446155312,
+      "Weather ridge 0.03": 0.561681118708904,
+      "Weather ridge 0.3": 0.5554198057762038,
+      "Weather neural network 0.1": 0.9312474105872274,
+      "Weather neural network 1": 0.7426056605634167,
+      "Weather + radar ridge 0.03": 0.5555891221173794,
+      "Weather + radar ridge 0.3": 0.5459259636729233,
+      "Weather + radar neural network 0.1": 0.7094923652205075,
+      "Weather + radar neural network 1": 0.7474753294441935
+    }
+  },
+  "historical_weather": "NOAA HRRR archived forecasts at the CUES grid point",
+  "radar": "Matched MRMS at the CUES cell and nearby regions, 5\u201390 minutes before the window start",
+  "training_scope": "November\u2013April issue dates in five winter seasons. Historical issue time is 30 minutes before the next whole hour. HRRR publication assumed three hours after initialization. A radar scan must have been observed at least five minutes before simulated issuance.",
+  "proxy_note": "Parsivel2 estimates frozen precipitation using a proprietary conversion. The archive retains large estimates even after removing capped minutes. Values describe the instrument response; calibrating to it does not convert SWE to fresh-snow depth.",
+  "training_target_qc": "Complete 60-minute hours only. Exclude four hours touching the instrument cap. Retain other published extremes.",
+  "calibration": {
+    "1": {
+      "lower_offset_mm": -5.2426686598449175,
+      "upper_offset_mm": 0.4441920920924914,
+      "n": 1492,
+      "runs": 254
+    },
+    "3": {
+      "lower_offset_mm": -13.440539490852597,
+      "upper_offset_mm": 2.3825795108670453,
+      "n": 1469,
+      "runs": 253
+    },
+    "6": {
+      "lower_offset_mm": -23.169771626079893,
+      "upper_offset_mm": 3.431612220650218,
+      "n": 1437,
+      "runs": 250
+    },
+    "12": {
+      "lower_offset_mm": -43.71975649546347,
+      "upper_offset_mm": 4.402658251624623,
+      "n": 1366,
+      "runs": 240
+    },
+    "24": {
+      "lower_offset_mm": -59.20121744483958,
+      "upper_offset_mm": 10.94474079142243,
+      "n": 1241,
+      "runs": 214
+    },
+    "48": {
+      "lower_offset_mm": -89.36143245474203,
+      "upper_offset_mm": 47.82167838947236,
+      "n": 1102,
+      "runs": 190
+    }
+  },
+  "calibration_note": "Central 80% empirical offsets from the model-selection winter. Correlated windows and winter-to-winter shifts limit calibration.",
+  "splits": {
+    "train": {
+      "season_start_years": [
+        2020,
+        2021
+      ],
+      "issues": 2694,
+      "runs": 449,
+      "runs_by_winter": {
+        "2020": 200,
+        "2021": 249
+      },
+      "unique_issue_dates": 314,
+      "first_issue": "2020-12-03T10:00:00+00:00",
+      "last_issue": "2022-04-30T15:00:00+00:00",
+      "issues_with_radar": 1559,
+      "issues_with_point_rate": 1559
+    },
+    "validation": {
+      "season_start_years": [
+        2022
+      ],
+      "issues": 1554,
+      "runs": 259,
+      "runs_by_winter": {
+        "2022": 259
+      },
+      "unique_issue_dates": 181,
+      "first_issue": "2022-11-01T04:00:00+00:00",
+      "last_issue": "2023-04-30T15:00:00+00:00",
+      "issues_with_radar": 891,
+      "issues_with_point_rate": 885
+    },
+    "test": {
+      "season_start_years": [
+        2023,
+        2024
+      ],
+      "issues": 2923,
+      "runs": 489,
+      "runs_by_winter": {
+        "2023": 233,
+        "2024": 256
+      },
+      "unique_issue_dates": 342,
+      "first_issue": "2023-11-01T04:00:00+00:00",
+      "last_issue": "2025-04-30T15:00:00+00:00",
+      "issues_with_radar": 802,
+      "issues_with_point_rate": 801
+    }
+  },
+  "validation": {
+    "1": {
+      "split": "validation",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 1,
+      "n": 1492,
+      "n_runs": 254,
+      "n_wet": 492,
+      "n_dry": 1000,
+      "rmse_mm": 11.009785162768152,
+      "mae_mm": 3.4471078229007714,
+      "wet_rmse_mm": 18.58589976004114,
+      "dry_rmse_mm": 3.301360546016733,
+      "bias_mm": 0.40614756360515003
+    },
+    "3": {
+      "split": "validation",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 3,
+      "n": 1469,
+      "n_runs": 253,
+      "n_wet": 555,
+      "n_dry": 914,
+      "rmse_mm": 23.144968858433177,
+      "mae_mm": 8.468038971033868,
+      "wet_rmse_mm": 37.57129521620733,
+      "dry_rmse_mm": 1.9537215946911735,
+      "bias_mm": 1.1025728914235078
+    },
+    "6": {
+      "split": "validation",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 6,
+      "n": 1437,
+      "n_runs": 250,
+      "n_wet": 599,
+      "n_dry": 838,
+      "rmse_mm": 34.952663804699206,
+      "mae_mm": 14.24392464597247,
+      "wet_rmse_mm": 53.997326782274094,
+      "dry_rmse_mm": 3.287279951403316,
+      "bias_mm": 2.2499575246733774
+    },
+    "12": {
+      "split": "validation",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 12,
+      "n": 1366,
+      "n_runs": 240,
+      "n_wet": 634,
+      "n_dry": 732,
+      "rmse_mm": 51.391954877329574,
+      "mae_mm": 23.13177024641513,
+      "wet_rmse_mm": 75.23155181494411,
+      "dry_rmse_mm": 5.159100317075052,
+      "bias_mm": 5.687081497930132
+    },
+    "24": {
+      "split": "validation",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 24,
+      "n": 1241,
+      "n_runs": 214,
+      "n_wet": 642,
+      "n_dry": 599,
+      "rmse_mm": 76.25083306954777,
+      "mae_mm": 36.54247656615309,
+      "wet_rmse_mm": 105.59855730752724,
+      "dry_rmse_mm": 9.706177384230479,
+      "bias_mm": 8.33989415914873
+    },
+    "48": {
+      "split": "validation",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 48,
+      "n": 1102,
+      "n_runs": 190,
+      "n_wet": 645,
+      "n_dry": 457,
+      "rmse_mm": 112.50678292343933,
+      "mae_mm": 59.7265491679636,
+      "wet_rmse_mm": 146.0239490033094,
+      "dry_rmse_mm": 20.685117185005605,
+      "bias_mm": 12.509381591062791
+    }
+  },
+  "test": {
+    "1": {
+      "split": "test",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 1,
+      "n": 2529,
+      "n_runs": 476,
+      "n_wet": 494,
+      "n_dry": 2035,
+      "rmse_mm": 5.505279604302758,
+      "mae_mm": 1.674134902410942,
+      "wet_rmse_mm": 11.57871409267092,
+      "dry_rmse_mm": 2.2628593494836946,
+      "bias_mm": 0.6940323610075976,
+      "interval_coverage": 0.8849347568208779
+    },
+    "3": {
+      "split": "test",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 3,
+      "n": 1936,
+      "n_runs": 475,
+      "n_wet": 451,
+      "n_dry": 1485,
+      "rmse_mm": 12.413394201937727,
+      "mae_mm": 3.9753817788800867,
+      "wet_rmse_mm": 23.08475702646146,
+      "dry_rmse_mm": 6.2486195820944825,
+      "bias_mm": 1.6349772516760372,
+      "interval_coverage": 0.8966942148760331
+    },
+    "6": {
+      "split": "test",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 6,
+      "n": 1800,
+      "n_runs": 471,
+      "n_wet": 489,
+      "n_dry": 1311,
+      "rmse_mm": 20.409302870918395,
+      "mae_mm": 6.67140783638757,
+      "wet_rmse_mm": 38.609636334088734,
+      "dry_rmse_mm": 3.9848199648329197,
+      "bias_mm": 3.2539631497443913,
+      "interval_coverage": 0.8916666666666667
+    },
+    "12": {
+      "split": "test",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 12,
+      "n": 1515,
+      "n_runs": 426,
+      "n_wet": 527,
+      "n_dry": 988,
+      "rmse_mm": 35.56845761980991,
+      "mae_mm": 12.165220545340885,
+      "wet_rmse_mm": 60.01273889857818,
+      "dry_rmse_mm": 4.343989329200807,
+      "bias_mm": 6.130482304669759,
+      "interval_coverage": 0.8851485148514852
+    },
+    "24": {
+      "split": "test",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 24,
+      "n": 214,
+      "n_runs": 37,
+      "n_wet": 59,
+      "n_dry": 155,
+      "rmse_mm": 21.481459492934007,
+      "mae_mm": 14.645102235319296,
+      "wet_rmse_mm": 36.68079328059945,
+      "dry_rmse_mm": 11.178207101497335,
+      "bias_mm": 4.105591473143648,
+      "interval_coverage": 0.8878504672897196
+    },
+    "48": {
+      "split": "test",
+      "method": "Weather + radar ridge 0.3",
+      "horizon": 48,
+      "n": 162,
+      "n_runs": 27,
+      "n_wet": 66,
+      "n_dry": 96,
+      "rmse_mm": 30.607835079337143,
+      "mae_mm": 25.38076990087637,
+      "wet_rmse_mm": 36.19036613727052,
+      "dry_rmse_mm": 26.08579561986114,
+      "bias_mm": 13.856496122786483,
+      "interval_coverage": 0.9629629629629629
+    }
+  }
+}

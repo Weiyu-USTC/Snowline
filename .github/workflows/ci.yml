@@ -41,5 +41,9 @@ jobs:
         run: |
           xcrun swiftc -parse-as-library desktop/HourlyRefreshPolicy.swift desktop/tests/HourlyRefreshPolicyTests.swift -o "$RUNNER_TEMP/snowline-policy-tests"
           "$RUNNER_TEMP/snowline-policy-tests"
+      - name: Check snowfall totals against hourly bars
+        run: |
+          xcrun swiftc -parse-as-library desktop/SnowfallOutlook.swift desktop/tests/SnowfallOutlookTests.swift -o "$RUNNER_TEMP/snowline-outlook-tests"
+          "$RUNNER_TEMP/snowline-outlook-tests"
       - name: Build widget from source
         run: /bin/zsh desktop/build.sh

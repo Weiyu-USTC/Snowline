@@ -1,8 +1,8 @@
 # Snowline
 
-Mountain weather forecasts, trained snowfall models, and a floating macOS widget for **Alta, Vail, Stowe, and Jay Peak**.
+Mountain weather forecasts, trained snowfall models, and a floating macOS widget for **Alta, Vail, Stowe, Jay Peak, and Mammoth Mountain**.
 
-Snowline compares the selected forecast, labeled **Our model**, with Open-Meteo over the same location and accumulation window. Choose 1, 3, 6, 12, 24, or 48 hours; switch between metric and US units; refresh all four mountains together. The Mac widget can also refresh at the top of each hour while it is open and Wi-Fi is available.
+Snowline compares the selected forecast, labeled **Our model**, with weather guidance over matching locations, quantities and windows. Choose 1, 3, 6, 12, 24, or 48 hours; switch between metric and US units; refresh all five mountains together. The Mac widget can also refresh at the top of each hour while it is open and Wi-Fi is available.
 
 This is a research application. The local model adaptations are not the full published DGMR or NowcastNet systems, and their results do not establish operational forecast superiority.
 
@@ -42,6 +42,18 @@ If you already have this release's source, run the commands beginning with `bash
 
 Open **http://127.0.0.1:8765/** and click **Refresh all**. The first update can take several minutes and download substantial weather/radar data. Missing or late feeds are reported separately; a missing forecast is never silently presented as zero. If a service is temporarily unavailable, a later refresh can retry it.
 
+### Seasonal accumulation view
+
+On **Full forecast**, the **Season snowfall** panel compares individual past seasons (faint lines) with the current observed record (solid line). Use **Full season** for October–May or **Recent + forecast** to inspect the latest dates; the cm/in switch applies to this chart too.
+
+When a measured total and the selected 48-hour model share the same observation site and cutoff, a dashed **Our model** line continues from that total, with the model's uncertainty range when supplied. It does not extrapolate the 48-hour forecast to the end of the ski season. The connector between forecast endpoints illustrates accumulation; it does not establish hourly snowfall timing.
+
+**Refresh all** also updates seasonal observations. Missing days stay visible as gaps. Incomplete daily sums are explicitly marked as recorded-only subtotals, not complete seasonal totals; an unsupported forecast connection is withheld with an explanation. Alta's published season totals are identified separately from its manual research archive. Vail remains a sensor proxy, and the Stowe/Jay targets are nearby town observers, not summit snowfall. Expand **Observation sources & coverage** for the dates and provenance.
+
+### Mammoth Mountain, California
+
+Choose **Mammoth Mountain** for hourly and cumulative forecasts over the next 1–48 hours. **Snow water** compares the fitted Jeff Dozier station forecast with issued HRRR and available ECMWF guidance. **Fresh snow depth** estimates Main Lodge snow in inches or centimetres using a separate calibration checked against monthly resort reports. The page also shows the resort’s season history, live MRMS radar and Sesame station readings. **Refresh all** acquires the inputs and runs the saved models. The Mammoth weights and evaluation ship in `artifacts/mammoth-hourly/`. [Data sources](docs/DATA_SOURCES.md#mammoth-mountain-california)
+
 ### Floating Mac widget
 
 After the setup above:
@@ -57,7 +69,7 @@ Or double-click **Open Snowline Widget.command**. The widget starts the local se
 
 ## What the forecasts mean
 
-| Window | Selected approach |
+| Window | Selected approach for Alta, Vail, Stowe and Jay Peak |
 | --- | --- |
 | 1–3 hours | Radar nowcasting, radar/HRRR combinations, or HRRR where radar verification is insufficient |
 | 6–12 hours | Native HRRR guidance; Alta additionally has a trained 12-hour combination for its supported reporting window |

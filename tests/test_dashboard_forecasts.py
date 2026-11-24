@@ -103,6 +103,31 @@ class DashboardForecastTests(unittest.TestCase):
         self.assertEqual(served['hours_available'], 1)
         self.assertEqual(len(result['hourly']), 2)
 
+
+    def test_mammoth_forecast_uses_only_its_hourly_provider(self):
+        now = pd.Timestamp('2026-11-24T16:23Z')
+        row = self.saved_fixture(now)['hourly'][0]
+        provider = {'name': 'Open-Meteo', 'retrieved_at': now.isoformat()}
+        original_clock = dashboard._utc
+        with tempfile.TemporaryDirectory() as directory, patch.object(dashboard, 'CACHE', Path(directory)), \
+             patch.object(dashboard, '_utc', side_effect=lambda value=None: original_clock(now if value is None else value)), \
+             patch.object(dashboard, '_fetch_hourly', return_value=([row], provider, now)) as hourly, \
+             patch.object(dashboard, '_fetch_daily') as daily:
+            empty = dashboard.get_forecast('mammoth')
+            self.assertEqual(empty['status'], 'unavailable')
+            result = dashboard.get_forecast('mammoth', refresh=True)
+            self.assertEqual(result['status'], 'ready')
+            self.assertFalse(result['capabilities']['daily_snow_model'])
+            self.assertEqual(result['daily'], [])
+            snapshot = Path(directory, 'mammoth.json')
+            before = snapshot.read_bytes()
+            hourly.side_effect = OSError('offline')
+            retained = dashboard.get_forecast('mammoth', refresh=True)
+            self.assertEqual(retained['status'], 'partial')
+            self.assertEqual(retained['source']['retrieved_at'], provider['retrieved_at'])
+            self.assertEqual(snapshot.read_bytes(), before)
+            daily.assert_not_called()
+
     def test_source_failure_never_fabricates_daily_powder(self):
         with tempfile.TemporaryDirectory() as directory, patch.object(dashboard, 'CACHE', Path(directory)), \
              patch.object(dashboard, '_fetch_hourly', side_effect=OSError('Offline')), \

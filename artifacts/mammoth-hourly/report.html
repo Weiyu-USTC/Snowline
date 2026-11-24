@@ -1,0 +1,712 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mammoth hourly model evaluation</title><style>body{font:16px/1.5 system-ui,sans-serif;margin:auto;max-width:1080px;padding:2rem;color:#17383f}
+    h1,h2{line-height:1.18}h2{margin-top:2rem}h3{margin-top:1.5rem}p{max-width:85ch}
+    h1{font-size:2.2rem}img{width:100%;height:auto}table{border-collapse:collapse;font-size:.9rem}
+    td,th{padding:.42rem .6rem;border-bottom:1px solid #dde5e4;text-align:right}th:first-child,td:first-child{text-align:left}
+    section{overflow-x:auto}a{color:#146b70}summary{cursor:pointer}</style><main>
+    <p><a href="/?mountain=mammoth&amp;hours=48">Mammoth live forecast</a></p>
+    <h1>How well does Snowline predict falling snow at Mammoth?</h1>
+    <p>The selected forecast is <strong>Weather + radar ridge 0.3</strong>. Each hourly value predicts the water
+    equivalent of falling snow at the Jeff Dozier Snow Study Site, about 1.1 km from Main Lodge.
+    An accumulation of 1 mm SWE means 1 litre of water per square metre after melting.</p>
+    <h2>Two storms from held-out winters</h2>
+    <img src="validation.png" alt="Hourly and accumulated snow-water predictions against station observations in two withheld storm windows">
+    <p>Each column starts from a single issued forecast. Examples were chosen by observed 48-hour accumulation,
+    using the median and 90th percentile among complete snowy test dates. Only the earliest complete
+    snowy start per UTC date was eligible. The tables below use all eligible windows.</p>
+    <h2>Forecast errors by horizon</h2>
+    <p>Accumulation errors are in mm SWE. RMSE gives large misses more weight. MAE is the mean absolute miss.
+    Positive mean error indicates overprediction. The prediction range uses errors from the validation winter.
+    Its coverage is measured below on the two later winters.</p><section><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Hours</th>
+      <th>Windows</th>
+      <th>Weather runs</th>
+      <th>RMSE</th>
+      <th>MAE</th>
+      <th>Mean error</th>
+      <th>80% range coverage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>2529</td>
+      <td>476</td>
+      <td>5.51</td>
+      <td>1.67</td>
+      <td>0.69</td>
+      <td>88%</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>1936</td>
+      <td>475</td>
+      <td>12.41</td>
+      <td>3.98</td>
+      <td>1.63</td>
+      <td>90%</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>1800</td>
+      <td>471</td>
+      <td>20.41</td>
+      <td>6.67</td>
+      <td>3.25</td>
+      <td>89%</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>1515</td>
+      <td>426</td>
+      <td>35.57</td>
+      <td>12.17</td>
+      <td>6.13</td>
+      <td>89%</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td>214</td>
+      <td>37</td>
+      <td>21.48</td>
+      <td>14.65</td>
+      <td>4.11</td>
+      <td>89%</td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td>162</td>
+      <td>27</td>
+      <td>30.61</td>
+      <td>25.38</td>
+      <td>13.86</td>
+      <td>96%</td>
+    </tr>
+  </tbody>
+</table></section>
+    <h2>Matched comparisons on wet and dry windows</h2>
+    <p>Every pair of scores uses the same complete observed hours and forecast windows. Wet means measured
+    accumulation greater than zero. Dry means exactly zero throughout the window. A dash indicates that
+    the sample was empty. An extended HRRR cycle reaches 48 hours from initialization. A later rolling
+    forecast can therefore have fewer than 48 native HRRR hours. The fitted model handles its remaining hours.</p>
+    <section><h3>Native HRRR</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Horizon</th>
+      <th>Windows</th>
+      <th>Wet</th>
+      <th>Our model</th>
+      <th>Reference</th>
+      <th>Our wet</th>
+      <th>Ref wet</th>
+      <th>Our dry</th>
+      <th>Ref dry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1h</td>
+      <td>2529</td>
+      <td>494</td>
+      <td>5.51</td>
+      <td>6.20</td>
+      <td>11.58</td>
+      <td>14.01</td>
+      <td>2.26</td>
+      <td>0.28</td>
+    </tr>
+    <tr>
+      <td>3h</td>
+      <td>1936</td>
+      <td>451</td>
+      <td>12.41</td>
+      <td>14.80</td>
+      <td>23.08</td>
+      <td>30.64</td>
+      <td>6.25</td>
+      <td>0.81</td>
+    </tr>
+    <tr>
+      <td>6h</td>
+      <td>1800</td>
+      <td>489</td>
+      <td>20.41</td>
+      <td>23.03</td>
+      <td>38.61</td>
+      <td>44.19</td>
+      <td>3.98</td>
+      <td>0.41</td>
+    </tr>
+    <tr>
+      <td>12h</td>
+      <td>1515</td>
+      <td>527</td>
+      <td>35.57</td>
+      <td>39.24</td>
+      <td>60.01</td>
+      <td>66.53</td>
+      <td>4.34</td>
+      <td>0.30</td>
+    </tr>
+    <tr>
+      <td>24h</td>
+      <td>214</td>
+      <td>59</td>
+      <td>21.48</td>
+      <td>25.83</td>
+      <td>36.68</td>
+      <td>49.19</td>
+      <td>11.18</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>48h</td>
+      <td>0</td>
+      <td>0</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table><h3>ECMWF IFS via Open-Meteo</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Horizon</th>
+      <th>Windows</th>
+      <th>Wet</th>
+      <th>Our model</th>
+      <th>Reference</th>
+      <th>Our wet</th>
+      <th>Ref wet</th>
+      <th>Our dry</th>
+      <th>Ref dry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1h</td>
+      <td>1671</td>
+      <td>289</td>
+      <td>5.46</td>
+      <td>6.13</td>
+      <td>12.16</td>
+      <td>14.72</td>
+      <td>2.27</td>
+      <td>0.28</td>
+    </tr>
+    <tr>
+      <td>3h</td>
+      <td>1231</td>
+      <td>259</td>
+      <td>12.00</td>
+      <td>12.68</td>
+      <td>23.50</td>
+      <td>27.62</td>
+      <td>5.93</td>
+      <td>0.62</td>
+    </tr>
+    <tr>
+      <td>6h</td>
+      <td>1135</td>
+      <td>271</td>
+      <td>21.16</td>
+      <td>19.74</td>
+      <td>42.55</td>
+      <td>40.39</td>
+      <td>4.51</td>
+      <td>0.09</td>
+    </tr>
+    <tr>
+      <td>12h</td>
+      <td>936</td>
+      <td>292</td>
+      <td>40.02</td>
+      <td>38.60</td>
+      <td>71.47</td>
+      <td>69.10</td>
+      <td>3.38</td>
+      <td>0.03</td>
+    </tr>
+    <tr>
+      <td>24h</td>
+      <td>0</td>
+      <td>0</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>48h</td>
+      <td>0</td>
+      <td>0</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table><h3>HRRR with a decaying persistence forecast beyond its last hour</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Horizon</th>
+      <th>Windows</th>
+      <th>Wet</th>
+      <th>Our model</th>
+      <th>Reference</th>
+      <th>Our wet</th>
+      <th>Ref wet</th>
+      <th>Our dry</th>
+      <th>Ref dry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1h</td>
+      <td>2529</td>
+      <td>494</td>
+      <td>5.51</td>
+      <td>6.20</td>
+      <td>11.58</td>
+      <td>14.01</td>
+      <td>2.26</td>
+      <td>0.28</td>
+    </tr>
+    <tr>
+      <td>3h</td>
+      <td>1936</td>
+      <td>451</td>
+      <td>12.41</td>
+      <td>14.80</td>
+      <td>23.08</td>
+      <td>30.64</td>
+      <td>6.25</td>
+      <td>0.81</td>
+    </tr>
+    <tr>
+      <td>6h</td>
+      <td>1800</td>
+      <td>489</td>
+      <td>20.41</td>
+      <td>23.03</td>
+      <td>38.61</td>
+      <td>44.19</td>
+      <td>3.98</td>
+      <td>0.41</td>
+    </tr>
+    <tr>
+      <td>12h</td>
+      <td>1515</td>
+      <td>527</td>
+      <td>35.57</td>
+      <td>39.24</td>
+      <td>60.01</td>
+      <td>66.53</td>
+      <td>4.34</td>
+      <td>0.30</td>
+    </tr>
+    <tr>
+      <td>24h</td>
+      <td>214</td>
+      <td>59</td>
+      <td>21.48</td>
+      <td>25.83</td>
+      <td>36.68</td>
+      <td>49.19</td>
+      <td>11.18</td>
+      <td>0.00</td>
+    </tr>
+    <tr>
+      <td>48h</td>
+      <td>162</td>
+      <td>66</td>
+      <td>30.61</td>
+      <td>37.86</td>
+      <td>36.19</td>
+      <td>59.32</td>
+      <td>26.09</td>
+      <td>0.00</td>
+    </tr>
+  </tbody>
+</table><h3>Monthly station average</h3><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Horizon</th>
+      <th>Windows</th>
+      <th>Wet</th>
+      <th>Our model</th>
+      <th>Reference</th>
+      <th>Our wet</th>
+      <th>Ref wet</th>
+      <th>Our dry</th>
+      <th>Ref dry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1h</td>
+      <td>2529</td>
+      <td>494</td>
+      <td>5.51</td>
+      <td>6.65</td>
+      <td>11.58</td>
+      <td>14.63</td>
+      <td>2.26</td>
+      <td>1.74</td>
+    </tr>
+    <tr>
+      <td>3h</td>
+      <td>1936</td>
+      <td>451</td>
+      <td>12.41</td>
+      <td>16.13</td>
+      <td>23.08</td>
+      <td>32.01</td>
+      <td>6.25</td>
+      <td>5.29</td>
+    </tr>
+    <tr>
+      <td>6h</td>
+      <td>1800</td>
+      <td>489</td>
+      <td>20.41</td>
+      <td>25.53</td>
+      <td>38.61</td>
+      <td>45.73</td>
+      <td>3.98</td>
+      <td>10.74</td>
+    </tr>
+    <tr>
+      <td>12h</td>
+      <td>1515</td>
+      <td>527</td>
+      <td>35.57</td>
+      <td>43.72</td>
+      <td>60.01</td>
+      <td>67.80</td>
+      <td>4.34</td>
+      <td>21.89</td>
+    </tr>
+    <tr>
+      <td>24h</td>
+      <td>214</td>
+      <td>59</td>
+      <td>21.48</td>
+      <td>56.09</td>
+      <td>36.68</td>
+      <td>54.49</td>
+      <td>11.18</td>
+      <td>56.69</td>
+    </tr>
+    <tr>
+      <td>48h</td>
+      <td>162</td>
+      <td>66</td>
+      <td>30.61</td>
+      <td>124.84</td>
+      <td>36.19</td>
+      <td>122.20</td>
+      <td>26.09</td>
+      <td>126.62</td>
+    </tr>
+  </tbody>
+</table></section>
+    <h2>Long windows with a missing sensor minute</h2><p>During 2024/25 the sensor regularly missed one minute at 12 UTC. Here every hour has at least 59 measured minutes. We sum only measured minutes, and weight each issued hourly prediction by its observed duration. This assumes a uniform forecast rate within each hour. Capped hours are excluded. These scores compare observed-time subtotals in mm SWE. Each row uses identical windows for the model and its reference.</p><section><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Horizon</th>
+      <th>Reference</th>
+      <th>Windows</th>
+      <th>Wet</th>
+      <th>Our RMSE</th>
+      <th>Ref RMSE</th>
+      <th>Our wet</th>
+      <th>Ref wet</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>24h</td>
+      <td>Native HRRR</td>
+      <td>2635</td>
+      <td>1209</td>
+      <td>59.03</td>
+      <td>83.95</td>
+      <td>86.48</td>
+      <td>123.94</td>
+    </tr>
+    <tr>
+      <td>24h</td>
+      <td>ECMWF</td>
+      <td>1800</td>
+      <td>709</td>
+      <td>56.61</td>
+      <td>79.55</td>
+      <td>89.29</td>
+      <td>126.76</td>
+    </tr>
+    <tr>
+      <td>24h</td>
+      <td>HRRR + tail</td>
+      <td>2635</td>
+      <td>1209</td>
+      <td>59.03</td>
+      <td>83.95</td>
+      <td>86.48</td>
+      <td>123.94</td>
+    </tr>
+    <tr>
+      <td>48h</td>
+      <td>ECMWF</td>
+      <td>1710</td>
+      <td>943</td>
+      <td>96.68</td>
+      <td>128.30</td>
+      <td>129.04</td>
+      <td>172.77</td>
+    </tr>
+    <tr>
+      <td>48h</td>
+      <td>HRRR + tail</td>
+      <td>2481</td>
+      <td>1524</td>
+      <td>104.50</td>
+      <td>133.71</td>
+      <td>132.43</td>
+      <td>170.60</td>
+    </tr>
+  </tbody>
+</table></section><h2>Fresh-snow depth at Main Lodge</h2><p>A separate calibration translates hourly HRRR snow water into estimated fresh-snow depth using complete Pacific calendar months of resort reports. The validation winter selected single ratio. Error was measured on 12 held-out months. Hourly resort depth timing comes from the weather model and has no independent hourly depth score.</p><section><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Depth forecast</th>
+      <th>Monthly RMSE (in)</th>
+      <th>Monthly MAE (in)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>single ratio</td>
+      <td>13.44</td>
+      <td>10.32</td>
+    </tr>
+    <tr>
+      <td>temperature ratios</td>
+      <td>23.62</td>
+      <td>18.50</td>
+    </tr>
+    <tr>
+      <td>fixed 10 to 1</td>
+      <td>18.33</td>
+      <td>14.00</td>
+    </tr>
+    <tr>
+      <td>climatology inches</td>
+      <td>34.31</td>
+      <td>27.13</td>
+    </tr>
+  </tbody>
+</table></section><details><summary>Measured and predicted monthly fresh snow</summary><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Month</th>
+      <th>Observed (in)</th>
+      <th>Our model (in)</th>
+      <th>Historical average (in)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>2023-11</td>
+      <td>14.00</td>
+      <td>10.18</td>
+      <td>28.30</td>
+    </tr>
+    <tr>
+      <td>2023-12</td>
+      <td>12.00</td>
+      <td>13.95</td>
+      <td>66.02</td>
+    </tr>
+    <tr>
+      <td>2024-01</td>
+      <td>72.00</td>
+      <td>38.60</td>
+      <td>68.53</td>
+    </tr>
+    <tr>
+      <td>2024-02</td>
+      <td>133.00</td>
+      <td>115.73</td>
+      <td>68.95</td>
+    </tr>
+    <tr>
+      <td>2024-03</td>
+      <td>95.00</td>
+      <td>107.11</td>
+      <td>61.30</td>
+    </tr>
+    <tr>
+      <td>2024-04</td>
+      <td>31.00</td>
+      <td>19.08</td>
+      <td>33.49</td>
+    </tr>
+    <tr>
+      <td>2024-11</td>
+      <td>62.00</td>
+      <td>62.42</td>
+      <td>28.30</td>
+    </tr>
+    <tr>
+      <td>2024-12</td>
+      <td>39.00</td>
+      <td>26.84</td>
+      <td>66.02</td>
+    </tr>
+    <tr>
+      <td>2025-01</td>
+      <td>10.00</td>
+      <td>12.71</td>
+      <td>68.53</td>
+    </tr>
+    <tr>
+      <td>2025-02</td>
+      <td>74.00</td>
+      <td>87.48</td>
+      <td>68.95</td>
+    </tr>
+    <tr>
+      <td>2025-03</td>
+      <td>76.00</td>
+      <td>69.77</td>
+      <td>61.30</td>
+    </tr>
+    <tr>
+      <td>2025-04</td>
+      <td>19.00</td>
+      <td>10.67</td>
+      <td>33.49</td>
+    </tr>
+  </tbody>
+</table></details><h2>Model selection</h2><p>Candidate weights were fitted on the first two winters. The next winter
+    selected the lowest mean validation RMSE relative to calendar climatology, with equal weight on each
+    of the six horizons. Later winters measure out-of-sample performance. Window starts within a
+    weather run overlap and should not be counted as independent storms.</p><section><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Use</th>
+      <th>Winters</th>
+      <th>Weather runs</th>
+      <th>Window starts</th>
+      <th>With valid point radar</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Train</td>
+      <td>2020/21, 2021/22</td>
+      <td>449</td>
+      <td>2694</td>
+      <td>1559</td>
+    </tr>
+    <tr>
+      <td>Validation</td>
+      <td>2022/23</td>
+      <td>259</td>
+      <td>1554</td>
+      <td>885</td>
+    </tr>
+    <tr>
+      <td>Test</td>
+      <td>2023/24, 2024/25</td>
+      <td>489</td>
+      <td>2923</td>
+      <td>801</td>
+    </tr>
+  </tbody>
+</table></section>
+    <details><summary>Validation scores for all candidates</summary><table class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Candidate</th>
+      <th>Validation score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Weather + radar ridge 0.3</td>
+      <td>0.55</td>
+    </tr>
+    <tr>
+      <td>Weather ridge 0.3</td>
+      <td>0.56</td>
+    </tr>
+    <tr>
+      <td>Weather + radar ridge 0.03</td>
+      <td>0.56</td>
+    </tr>
+    <tr>
+      <td>Calibrated HRRR + radar update</td>
+      <td>0.56</td>
+    </tr>
+    <tr>
+      <td>Weather ridge 0.03</td>
+      <td>0.56</td>
+    </tr>
+    <tr>
+      <td>Calibrated HRRR</td>
+      <td>0.57</td>
+    </tr>
+    <tr>
+      <td>Power-calibrated HRRR 0.75</td>
+      <td>0.57</td>
+    </tr>
+    <tr>
+      <td>Power-calibrated HRRR 1.25</td>
+      <td>0.58</td>
+    </tr>
+    <tr>
+      <td>Weather + radar neural network 0.1</td>
+      <td>0.71</td>
+    </tr>
+    <tr>
+      <td>Weather neural network 1</td>
+      <td>0.74</td>
+    </tr>
+    <tr>
+      <td>Weather + radar neural network 1</td>
+      <td>0.75</td>
+    </tr>
+    <tr>
+      <td>Weather neural network 0.1</td>
+      <td>0.93</td>
+    </tr>
+    <tr>
+      <td>HRRR with tail persistence</td>
+      <td>0.95</td>
+    </tr>
+    <tr>
+      <td>Calendar climatology</td>
+      <td>1.00</td>
+    </tr>
+  </tbody>
+</table></details>
+    <p>Complete hours contain 60 measured minutes. Four hours that hit the instrument limit were excluded.
+    Other published high rates were retained. The instrument series includes unusually large readings. Model and error values are expressed on its measurement scale. The station estimates frozen precipitation intensity from
+    particle measurements using a proprietary conversion. Extreme rates affect RMSE, and the model
+    inherits the instrument’s uncertainty. Winter data gaps are substantial at the longer horizons.
+    The resort’s season totals measure fresh-snow depth, a separate quantity.</p>
+    <p><a href="metrics.csv">Download scores</a> · <a href="https://doi.org/10.5281/zenodo.17179963">Station data</a>
+    · <a href="https://registry.opendata.aws/noaa-hrrr-pds/">NOAA HRRR</a>
+    · <a href="https://www.nssl.noaa.gov/projects/mrms/">NOAA MRMS</a>
+    · <a href="https://open-meteo.com/en/docs/single-runs-api">Open-Meteo single-run archive</a></p></main></html>

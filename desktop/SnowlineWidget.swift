@@ -4,18 +4,10 @@ import SwiftUI
 private let teal = Color(red: 0.06, green: 0.37, blue: 0.40)
 private let ink = Color(red: 0.10, green: 0.20, blue: 0.23)
 private let mountains = [("alta", "Alta", "Utah"), ("vail", "Vail", "Colorado"),
-                         ("mansfield", "Stowe", "Vermont"), ("jay", "Jay Peak", "Vermont")]
+                         ("mansfield", "Stowe", "Vermont"), ("jay", "Jay Peak", "Vermont"),
+                         ("mammoth", "Mammoth Mountain", "California")]
 private let horizons = [1, 3, 6, 12, 24, 48]
 private let baseURL = "http://127.0.0.1:8765"
-
-private func parseDate(_ text: String?) -> Date? {
-    guard let text = text else { return nil }
-    let formatter = ISO8601DateFormatter()
-    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-    if let date = formatter.date(from: text) { return date }
-    formatter.formatOptions = [.withInternetDateTime]
-    return formatter.date(from: text)
-}
 
 private func snowColor(_ inches: Double) -> Color {
     let t = min(max(inches, 0), 1)
@@ -159,8 +151,7 @@ final class ForecastStore: ObservableObject {
         if automatic && !autoUpdater.mayStartRefresh { return }
         refreshing = true
         failed = false
-        message = "Updating radar and weather for all four mountains…"
-        let selected = site
+        message = "Updating radar and weather for all mountains…"
         defer { refreshing = false }
         do {
             try await ensureServer(activate: !automatic)
@@ -174,11 +165,14 @@ final class ForecastStore: ObservableObject {
                 try await Task.sleep(nanoseconds: 2_000_000_000)
                 let state = try await request("/api/jobs/" + jobID)
                 let status = state["status"] as? String ?? ""
-                message = state["message"] as? String ?? "Updating all four mountains…"
+                message = state["message"] as? String ?? "Updating all mountains…"
                 if status == "succeeded" || status == "partial" || status == "failed" {
                     // Fetch the selected mountain after the one shared batch.
                     // Never retimestamp a retained forecast when a source fails.
-                    payload = try await request("/api/forecast?site=" + selected)
+                    let selected = site
+                    let forecast = try await request("/api/forecast?site=" + selected)
+                    guard selected == site else { return }
+                    payload = forecast
                     let result = state["result"] as? [String: Any]
                     failed = status == "failed" || status == "partial" || result?["status"] as? String == "partial"
                     if status == "failed" && message.isEmpty { message = "Refresh incomplete. Saved forecasts keep their original times." }
@@ -200,36 +194,33 @@ final class ForecastStore: ObservableObject {
             return start >= boundary && start < boundary.addingTimeInterval(Double(hours) * 3600)
         }.sorted { ($0["start"] as? String ?? "") < ($1["start"] as? String ?? "") }
     }
-    var amount: Double? {
-        let rows = selectedRows
-        let values = rows.compactMap { $0["snowfall_inches"] as? Double }
-        guard rows.count == hours && values.count == hours else { return nil }
-        return values.reduce(0, +)
+    var snowfallOutlook: SnowfallOutlook {
+        SnowfallOutlook(payload: payload ?? [:], record: deployedTotal, hours: hours, now: Date())
     }
     var unit: String { metric ? "cm" : "in" }
-    var totalText: String {
-        guard let amount = amount else { return "—" }
-        let converted = amount * (metric ? 2.54 : 1)
-        return converted > 0 && converted < 0.01 ? "<0.01" : String(format: "%.2f", converted)
-    }
     var siteInfo: [String: Any] { payload?["site"] as? [String: Any] ?? [:] }
     func dateText(_ date: Date, format: String) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = format
-        formatter.timeZone = TimeZone(identifier: siteInfo["timezone"] as? String ?? (site == "alta" || site == "vail" ? "America/Denver" : "America/New_York"))
+        let fallbackZone: String
+        switch site {
+        case "mammoth": fallbackZone = "America/Los_Angeles"
+        case "jay", "mansfield": fallbackZone = "America/New_York"
+        default: fallbackZone = "America/Denver"
+        }
+        formatter.timeZone = TimeZone(identifier: siteInfo["timezone"] as? String ?? fallbackZone)
         return formatter.string(from: date)
     }
-    var windowText: String {
-        let start = Date(timeIntervalSince1970: ceil(Date().timeIntervalSince1970 / 3600) * 3600)
-        return dateText(start, format: "MMM d, h a") + " – " + dateText(start.addingTimeInterval(Double(hours)*3600), format: "MMM d, h a z")
+    func windowText(_ outlook: SnowfallOutlook) -> String {
+        dateText(outlook.start, format: "MMM d, h a") + " – " + dateText(outlook.end, format: "MMM d, h a z")
     }
-    var sourceText: String {
-        let source = payload?["source"] as? [String: Any] ?? [:]
+    func sourceText(_ source: [String: Any]) -> String {
         guard let date = parseDate(source["retrieved_at"] as? String) else { return "No saved forecast yet · Refresh to fetch data" }
         let stale = source["stale"] as? Bool == true || Date().timeIntervalSince(date) > 6*3600
         return (stale ? "Older data · " : "Fetched ") + dateText(date, format: "MMM d, h:mm a z")
     }
     var targetText: String {
+        if site == "mammoth" { return "Mammoth Mountain Main Lodge" }
         if site == "jay" { return "NOAA station near Jay · below resort elevation" }
         if site == "mansfield" { return "Mount Mansfield station · not a resort-wide total" }
         if site == "vail" { return "Vail station location · mountain conditions vary" }
@@ -299,8 +290,12 @@ final class ForecastStore: ObservableObject {
     var deployedTotal: [String: Any]? {
         (deployed["horizons"] as? [[String: Any]] ?? []).first { $0["hours"] as? Int == hours }
     }
-    var deployedLiquid: Bool { deployedTotal?["quantity"] as? String == "liquid_precipitation" }
-    var deployedUnit: String { deployedLiquid ? (metric ? "mm water" : "in water") : unit }
+    var predictsSnowWater: Bool { site == "mammoth" }
+    var deployedLiquid: Bool { predictsSnowWater || deployedTotal?["quantity"] as? String == "liquid_precipitation" }
+    var deployedUnit: String {
+        if predictsSnowWater { return metric ? "mm snow water" : "in snow water" }
+        return deployedLiquid ? (metric ? "mm water" : "in water") : unit
+    }
     var deployedWindow: String {
         guard let start = parseDate(deployedTotal?["start"] as? String),
               let end = parseDate(deployedTotal?["end"] as? String) else { return "Forecast unavailable" }
@@ -315,10 +310,17 @@ final class ForecastStore: ObservableObject {
         guard let value = value as? Double, value.isFinite, value >= 0 else { return nil }
         return value
     }
-    var deployedBars: [(name: String, value: Double?, color: Color)] {
+    func deployedBars(_ outlook: SnowfallOutlook) -> [(name: String, value: Double?, color: Color)] {
         guard let total = deployedTotal, total["status"] as? String != "unavailable",
               let mean = validAmount(total["mean"]) else { return [] }
-        return [("Open-Meteo", validAmount(total["provider_mean"]), teal), ("Our model", mean, Color.orange)]
+        let provider = deployedLiquid ? validAmount(total["provider_mean"]) : (outlook.paired ? outlook.total : nil)
+        let providerName = predictsSnowWater ? (total["provider_name"] as? String ?? "HRRR") : "Open-Meteo"
+        var bars: [(name: String, value: Double?, color: Color)] = [(providerName, provider, teal)]
+        if predictsSnowWater, let amount = validAmount(total["ecmwf_mean"]) {
+            bars.append(("ECMWF", amount, Color.blue))
+        }
+        bars.append(("Our model", mean, Color.orange))
+        return bars
     }
     func deployedText(_ value: Double?) -> String {
         guard let value = value, value.isFinite, value >= 0 else { return "—" }
@@ -345,22 +347,20 @@ final class ForecastStore: ObservableObject {
 }
 
 private struct SnowBars: View {
-    @ObservedObject var store: ForecastStore
+    let outlook: SnowfallOutlook
+    let totalText: String
+    let unit: String
     var body: some View {
         Canvas { context, size in
             let baseline = size.height - 12
             var zero = Path()
             zero.move(to: CGPoint(x: 0, y: baseline)); zero.addLine(to: CGPoint(x: size.width, y: baseline))
             context.stroke(zero, with: .color(teal.opacity(0.35)), lineWidth: 1)
-            let rows = store.selectedRows
-            let scale = max(0.1, rows.compactMap { $0["snowfall_inches"] as? Double }.max() ?? 0)
-            let step = size.width / Double(store.hours)
-            let boundary = ceil(Date().timeIntervalSince1970 / 3600) * 3600
-            for row in rows {
-                guard let value = row["snowfall_inches"] as? Double,
-                      let start = parseDate(row["start"] as? String) else { continue }
-                let index = (start.timeIntervalSince1970 - boundary) / 3600
-                let x = index * step
+            let scale = max(0.1, outlook.amounts.compactMap { $0 }.max() ?? 0)
+            let step = size.width / Double(outlook.amounts.count)
+            for (index, entry) in outlook.amounts.enumerated() {
+                guard let value = entry else { continue }
+                let x = Double(index) * step
                 if value == 0 {
                     var path = Path()
                     path.move(to: CGPoint(x: x, y: baseline)); path.addLine(to: CGPoint(x: x + step, y: baseline))
@@ -373,7 +373,40 @@ private struct SnowBars: View {
             }
         }
         .frame(height: 66)
-        .accessibilityLabel("Hourly snowfall chart. " + (store.amount == 0 ? "No snowfall forecast, shown at zero." : "Total " + store.totalText + " " + store.unit))
+        .accessibilityLabel("Hourly snowfall chart. " + (outlook.total == 0 ? "No snowfall forecast, shown at zero." : "Total " + totalText + " " + unit))
+    }
+}
+
+private struct SnowDepthCard: View {
+    @ObservedObject var store: ForecastStore
+    let outlook: SnowfallOutlook
+    var body: some View {
+        let totalText = store.snowText(outlook.total)
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(alignment: .firstTextBaseline, spacing: 7) {
+                Text(totalText).font(.system(size: 42, weight: .semibold, design: .rounded)).monospacedDigit()
+                Text(store.unit + " snow").font(.system(size: 15)).foregroundColor(ink.opacity(0.7))
+                Spacer()
+                if store.loading || store.refreshing { ProgressView().controlSize(.small).frame(width: 20) }
+            }
+            Text(store.predictsSnowWater ? "Open-Meteo · fresh snow at Main Lodge" : outlook.paired ? "\(store.hours)-hour comparison window" : "Next \(store.hours) full hours").font(.system(size: 13, weight: .medium))
+            Text(store.windowText(outlook)).font(.system(size: 10)).foregroundColor(ink.opacity(0.65))
+            if store.predictsSnowWater, let depth = store.deployedTotal?["depth_inches"] as? Double {
+                Text("Our model · " + store.snowText(depth) + " " + store.unit + " fresh snow at Main Lodge")
+                    .font(.system(size: 12, weight: .medium))
+                Text("Depth calibrated on monthly resort totals").font(.system(size: 10)).foregroundColor(ink.opacity(0.65))
+            }
+            SnowBars(outlook: outlook, totalText: totalText, unit: store.unit)
+            HStack {
+                Text("0")
+                Spacer()
+                Text("Hourly intensity")
+                LinearGradient(colors: [snowColor(0), snowColor(0.5), snowColor(1)], startPoint: .leading, endPoint: .trailing).frame(width: 46, height: 5).clipShape(Capsule())
+                Text(store.metric ? "2.54+ cm/h" : "1+ in/h")
+            }.font(.system(size: 9)).foregroundColor(ink.opacity(0.6))
+            Text(outlook.total == nil && !store.loading ? "Incomplete forecast · \(outlook.amounts.compactMap { $0 }.count)/\(store.hours) hours available" : " ")
+                .font(.system(size: 10)).foregroundColor(.orange).frame(height: 12)
+        }.padding(14).background(Color.white).clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
@@ -381,6 +414,7 @@ private struct ForecastPanel: View {
     @ObservedObject var store: ForecastStore
     var close: () -> Void
     var body: some View {
+        let outlook = store.snowfallOutlook
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Image(systemName: "mountain.2.fill").font(.system(size: 20)).foregroundColor(teal)
@@ -410,30 +444,11 @@ private struct ForecastPanel: View {
             }
             ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 14) {
-            DeployedComparison(store: store)
+            DeployedComparison(store: store, outlook: outlook)
+            SnowDepthCard(store: store, outlook: outlook)
             VStack(alignment: .leading, spacing: 5) {
-                HStack(alignment: .firstTextBaseline, spacing: 7) {
-                    Text(store.totalText).font(.system(size: 42, weight: .semibold, design: .rounded)).monospacedDigit()
-                    Text(store.unit + " snow").font(.system(size: 15)).foregroundColor(ink.opacity(0.7))
-                    Spacer()
-                    if store.loading || store.refreshing { ProgressView().controlSize(.small).frame(width: 20) }
-                }
-                Text("Next \(store.hours) full hours").font(.system(size: 13, weight: .medium))
-                Text(store.windowText).font(.system(size: 10)).foregroundColor(ink.opacity(0.65))
-                SnowBars(store: store)
-                HStack {
-                    Text("0")
-                    Spacer()
-                    Text("Hourly intensity")
-                    LinearGradient(colors: [snowColor(0), snowColor(0.5), snowColor(1)], startPoint: .leading, endPoint: .trailing).frame(width: 46, height: 5).clipShape(Capsule())
-                    Text(store.metric ? "2.54+ cm/h" : "1+ in/h")
-                }.font(.system(size: 9)).foregroundColor(ink.opacity(0.6))
-                Text(store.amount == nil && !store.loading ? "Incomplete forecast · \(store.selectedRows.filter { $0["snowfall_inches"] is Double }.count)/\(store.hours) hours available" : " ")
-                    .font(.system(size: 10)).foregroundColor(.orange).frame(height: 12)
-            }.padding(14).background(Color.white).clipShape(RoundedRectangle(cornerRadius: 12))
-            VStack(alignment: .leading, spacing: 5) {
-                Text("Open-Meteo · external hourly forecast").font(.system(size: 11, weight: .semibold)).foregroundColor(teal)
-                Text(store.sourceText).font(.system(size: 10))
+                Text((outlook.source["target_label"] as? String).map { "Open-Meteo · " + $0 } ?? "Open-Meteo · external hourly forecast").font(.system(size: 11, weight: .semibold)).foregroundColor(teal)
+                Text(store.sourceText(outlook.source)).font(.system(size: 10))
             }
             }
             }.frame(height: 282)
@@ -448,7 +463,7 @@ private struct ForecastPanel: View {
                 }.buttonStyle(.borderedProminent).tint(teal)
             }
             HStack {
-                Text("Model errors & sources in the full dashboard.").font(.system(size: 9)).foregroundColor(ink.opacity(0.55))
+                Text(store.site == "mammoth" ? "Hourly model curve in Full forecast." : "Model errors & sources in the full dashboard.").font(.system(size: 9)).foregroundColor(ink.opacity(0.55))
                 Spacer()
                 Button("Quit") { NSApplication.shared.terminate(nil) }.buttonStyle(.plain).font(.system(size: 10)).foregroundColor(ink.opacity(0.65))
             }
@@ -468,7 +483,7 @@ private struct AutoUpdateControl: View {
             Toggle("Auto-update", isOn: $updater.enabled)
                 .toggleStyle(.switch).controlSize(.mini)
                 .font(.system(size: 11)).fixedSize()
-                .help("Refresh all four mountains at HH:00:00 on this Mac's clock, while Snowline is open and Wi-Fi is available. Sleeping or missed hours are skipped.")
+                .help("Refresh all mountains at HH:00:00 on this Mac's clock, while Snowline is open and Wi-Fi is available. Sleeping or missed hours are skipped.")
             Spacer(minLength: 0)
             Text(updater.statusText).font(.system(size: 9)).foregroundColor(ink.opacity(0.65)).lineLimit(1)
         }
@@ -521,10 +536,11 @@ private struct ForecastComparisonCard: View {
 
 private struct DeployedComparison: View {
     @ObservedObject var store: ForecastStore
+    let outlook: SnowfallOutlook
     var body: some View {
         ForecastComparisonCard(
             title: store.deployedWindow + " · " + store.deployedUnit,
-            values: store.deployedBars,
+            values: store.deployedBars(outlook),
             format: { store.deployedText($0) },
             emptyMessage: "Refresh all to load Our model. Full forecast has source and availability details.",
             detail: store.deployedRange,

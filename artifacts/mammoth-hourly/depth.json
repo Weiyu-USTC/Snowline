@@ -1,0 +1,542 @@
+{
+  "version": 1,
+  "target": "Mammoth Mountain Main Lodge",
+  "quantity": "fresh_snow_depth",
+  "unit": "inches",
+  "method_id": "single_ratio",
+  "ratios_cold_warm": [
+    7.997014437718343,
+    7.997014437718343
+  ],
+  "candidates": {
+    "single_ratio": [
+      7.997014437718343,
+      7.997014437718343
+    ],
+    "temperature_ratios": [
+      9.20961949550672,
+      2.914480302946463
+    ],
+    "fixed_10_to_1": [
+      10.0,
+      10.0
+    ]
+  },
+  "threshold_c": -5.0,
+  "scores": {
+    "train": {
+      "single_ratio": {
+        "months": 10,
+        "rmse_inches": 13.23396494172702,
+        "mae_inches": 9.332330558213739,
+        "bias_inches": -3.561214318330458
+      },
+      "temperature_ratios": {
+        "months": 10,
+        "rmse_inches": 12.304801987270732,
+        "mae_inches": 9.16833338735017,
+        "bias_inches": -5.118967175792156
+      },
+      "fixed_10_to_1": {
+        "months": 10,
+        "rmse_inches": 20.75394084328676,
+        "mae_inches": 11.205370236220476,
+        "bias_inches": 5.903616929133866
+      },
+      "climatology_inches": {
+        "months": 10,
+        "rmse_inches": 49.84565656566364,
+        "mae_inches": 41.62622641509434,
+        "bias_inches": 14.534150943396227
+      }
+    },
+    "validation": {
+      "single_ratio": {
+        "months": 6,
+        "rmse_inches": 28.61096531505331,
+        "mae_inches": 22.20373973882533,
+        "bias_inches": -13.266561666785067
+      },
+      "temperature_ratios": {
+        "months": 6,
+        "rmse_inches": 43.78737867773598,
+        "mae_inches": 31.452819879361986,
+        "bias_inches": -31.243797778240037
+      },
+      "fixed_10_to_1": {
+        "months": 6,
+        "rmse_inches": 29.519120775089636,
+        "mae_inches": 20.060834711286088,
+        "bias_inches": 12.840440354330724
+      },
+      "climatology_inches": {
+        "months": 6,
+        "rmse_inches": 88.00017609101339,
+        "mae_inches": 73.23270440251572,
+        "bias_inches": -63.06981132075472
+      }
+    },
+    "test": {
+      "single_ratio": {
+        "months": 12,
+        "rmse_inches": 13.43698471163493,
+        "mae_inches": 10.318510346578366,
+        "bias_inches": -5.204578261011256
+      },
+      "temperature_ratios": {
+        "months": 12,
+        "rmse_inches": 23.619693794434085,
+        "mae_inches": 18.49967183700729,
+        "bias_inches": -16.03610805161285
+      },
+      "fixed_10_to_1": {
+        "months": 12,
+        "rmse_inches": 18.33241496948313,
+        "mae_inches": 13.996490026246724,
+        "bias_inches": 6.787454002624678
+      },
+      "climatology_inches": {
+        "months": 12,
+        "rmse_inches": 34.30642785323714,
+        "mae_inches": 27.127987421383647,
+        "bias_inches": 1.3468553459119488
+      }
+    }
+  },
+  "months": [
+    {
+      "month": "2021-01",
+      "season": 2020,
+      "hours": 744,
+      "split": "train",
+      "observed_inches": 108.5,
+      "cold_swe_mm": 247.85346500000003,
+      "warm_swe_mm": 5.789174,
+      "climatology_inches": 68.52830188679245,
+      "climatology_years": 53,
+      "single_ratio": 79.85763173637724,
+      "temperature_ratios": 90.5318321608749,
+      "fixed_10_to_1": 99.8593066929134,
+      "estimate_inches": 79.85763173637724
+    },
+    {
+      "month": "2021-02",
+      "season": 2020,
+      "hours": 672,
+      "split": "train",
+      "observed_inches": 22.0,
+      "cold_swe_mm": 36.331758,
+      "warm_swe_mm": 25.414333999999997,
+      "climatology_inches": 68.94528301886793,
+      "climatology_years": 53,
+      "single_ratio": 19.44033028333406,
+      "temperature_ratios": 16.089419001509246,
+      "fixed_10_to_1": 24.30948503937008,
+      "estimate_inches": 19.44033028333406
+    },
+    {
+      "month": "2021-03",
+      "season": 2020,
+      "hours": 743,
+      "split": "train",
+      "observed_inches": 53.0,
+      "cold_swe_mm": 63.064183,
+      "warm_swe_mm": 32.918627,
+      "climatology_inches": 61.298113207547175,
+      "climatology_years": 53,
+      "single_ratio": 30.219524304833726,
+      "temperature_ratios": 26.643221228997838,
+      "fixed_10_to_1": 37.78850787401575,
+      "estimate_inches": 30.219524304833726
+    },
+    {
+      "month": "2021-04",
+      "season": 2020,
+      "hours": 720,
+      "split": "train",
+      "observed_inches": 5.0,
+      "cold_swe_mm": 11.050365,
+      "warm_swe_mm": 21.200718000000002,
+      "climatology_inches": 33.48867924528302,
+      "climatology_years": 53,
+      "single_ratio": 10.154030566261914,
+      "temperature_ratios": 6.439320155739672,
+      "fixed_10_to_1": 12.697276771653543,
+      "estimate_inches": 10.154030566261914
+    },
+    {
+      "month": "2021-11",
+      "season": 2021,
+      "hours": 721,
+      "split": "train",
+      "observed_inches": 9.0,
+      "cold_swe_mm": 0.0,
+      "warm_swe_mm": 16.112284,
+      "climatology_inches": 28.298113207547168,
+      "climatology_years": 53,
+      "single_ratio": 5.072841250890482,
+      "temperature_ratios": 1.8487769430503722,
+      "fixed_10_to_1": 6.343418897637796,
+      "estimate_inches": 5.072841250890482
+    },
+    {
+      "month": "2021-12",
+      "season": 2021,
+      "hours": 744,
+      "split": "train",
+      "observed_inches": 161.0,
+      "cold_swe_mm": 448.79719600000004,
+      "warm_swe_mm": 117.36845000000001,
+      "climatology_inches": 66.02264150943395,
+      "climatology_years": 53,
+      "single_ratio": 178.2533403622887,
+      "temperature_ratios": 176.1936788001066,
+      "fixed_10_to_1": 222.8998606299213,
+      "estimate_inches": 178.2533403622887
+    },
+    {
+      "month": "2022-01",
+      "season": 2021,
+      "hours": 744,
+      "split": "train",
+      "observed_inches": 0.0,
+      "cold_swe_mm": 0.0,
+      "warm_swe_mm": 0.001,
+      "climatology_inches": 68.52830188679245,
+      "climatology_years": 53,
+      "single_ratio": 0.0003148430880991474,
+      "temperature_ratios": 0.00011474331901364029,
+      "fixed_10_to_1": 0.00039370078740157485,
+      "estimate_inches": 0.0003148430880991474
+    },
+    {
+      "month": "2022-02",
+      "season": 2021,
+      "hours": 672,
+      "split": "train",
+      "observed_inches": 7.0,
+      "cold_swe_mm": 29.272482,
+      "warm_swe_mm": 0.0,
+      "climatology_inches": 68.94528301886793,
+      "climatology_years": 53,
+      "single_ratio": 9.216238629206707,
+      "temperature_ratios": 10.613717358624786,
+      "fixed_10_to_1": 11.524599212598426,
+      "estimate_inches": 9.216238629206707
+    },
+    {
+      "month": "2022-03",
+      "season": 2021,
+      "hours": 743,
+      "split": "train",
+      "observed_inches": 14.0,
+      "cold_swe_mm": 24.476762,
+      "warm_swe_mm": 33.430358999999996,
+      "climatology_inches": 61.298113207547175,
+      "climatology_years": 53,
+      "single_ratio": 18.231656798570988,
+      "temperature_ratios": 12.710779028661698,
+      "fixed_10_to_1": 22.79807913385827,
+      "estimate_inches": 18.231656798570988
+    },
+    {
+      "month": "2022-04",
+      "season": 2021,
+      "hours": 720,
+      "split": "train",
+      "observed_inches": 34.0,
+      "cold_swe_mm": 45.345197,
+      "warm_swe_mm": 41.815516,
+      "climatology_inches": 33.48867924528302,
+      "climatology_years": 53,
+      "single_ratio": 27.4419480418435,
+      "temperature_ratios": 21.23946882119431,
+      "fixed_10_to_1": 34.31524133858268,
+      "estimate_inches": 27.4419480418435
+    },
+    {
+      "month": "2022-11",
+      "season": 2022,
+      "hours": 721,
+      "split": "validation",
+      "observed_inches": 61.0,
+      "cold_swe_mm": 114.269453,
+      "warm_swe_mm": 31.376961,
+      "climatology_inches": 28.298113207547168,
+      "climatology_years": 53,
+      "single_ratio": 45.85576675432689,
+      "temperature_ratios": 45.03250853899639,
+      "fixed_10_to_1": 57.341107874015755,
+      "estimate_inches": 45.85576675432689
+    },
+    {
+      "month": "2022-12",
+      "season": 2022,
+      "hours": 744,
+      "split": "validation",
+      "observed_inches": 116.0,
+      "cold_swe_mm": 170.716182,
+      "warm_swe_mm": 282.100846,
+      "climatology_inches": 66.02264150943395,
+      "climatology_years": 53,
+      "single_ratio": 142.56631143939808,
+      "temperature_ratios": 94.26804870303964,
+      "fixed_10_to_1": 178.27442047244097,
+      "estimate_inches": 142.56631143939808
+    },
+    {
+      "month": "2023-01",
+      "season": 2022,
+      "hours": 744,
+      "split": "validation",
+      "observed_inches": 220.0,
+      "cold_swe_mm": 292.944429,
+      "warm_swe_mm": 220.129752,
+      "climatology_inches": 68.52830188679245,
+      "climatology_years": 53,
+      "single_ratio": 161.5378595699809,
+      "temperature_ratios": 131.47521853208562,
+      "fixed_10_to_1": 201.99770905511815,
+      "estimate_inches": 161.5378595699809
+    },
+    {
+      "month": "2023-02",
+      "season": 2022,
+      "hours": 672,
+      "split": "validation",
+      "observed_inches": 113.0,
+      "cold_swe_mm": 285.17681799999997,
+      "warm_swe_mm": 11.47748,
+      "climatology_inches": 68.94528301886793,
+      "climatology_years": 53,
+      "single_ratio": 93.39955528020472,
+      "temperature_ratios": 104.71735716956036,
+      "fixed_10_to_1": 116.79303070866142,
+      "estimate_inches": 93.39955528020472
+    },
+    {
+      "month": "2023-03",
+      "season": 2022,
+      "hours": 743,
+      "split": "validation",
+      "observed_inches": 192.0,
+      "cold_swe_mm": 295.575826,
+      "warm_swe_mm": 272.313135,
+      "climatology_inches": 61.298113207547175,
+      "climatology_years": 53,
+      "single_ratio": 178.7959141786563,
+      "temperature_ratios": 138.41701408351193,
+      "fixed_10_to_1": 223.57833110236223,
+      "estimate_inches": 178.7959141786563
+    },
+    {
+      "month": "2023-04",
+      "season": 2022,
+      "hours": 720,
+      "split": "validation",
+      "observed_inches": 3.0,
+      "cold_swe_mm": 9.862639,
+      "warm_swe_mm": 0.44479,
+      "climatology_inches": 33.48867924528302,
+      "climatology_years": 53,
+      "single_ratio": 3.2452227767227066,
+      "temperature_ratios": 3.627066303365845,
+      "fixed_10_to_1": 4.058042913385827,
+      "estimate_inches": 3.2452227767227066
+    },
+    {
+      "month": "2023-11",
+      "season": 2023,
+      "hours": 721,
+      "split": "test",
+      "observed_inches": 14.0,
+      "cold_swe_mm": 0.6997170000000001,
+      "warm_swe_mm": 31.621471999999994,
+      "climatology_inches": 28.298113207547168,
+      "climatology_years": 53,
+      "single_ratio": 10.17610295579619,
+      "temperature_ratios": 3.8820584495555344,
+      "fixed_10_to_1": 12.724877559055116,
+      "estimate_inches": 10.17610295579619
+    },
+    {
+      "month": "2023-12",
+      "season": 2023,
+      "hours": 744,
+      "split": "test",
+      "observed_inches": 12.0,
+      "cold_swe_mm": 1.6040639999999997,
+      "warm_swe_mm": 42.712541,
+      "climatology_inches": 66.02264150943395,
+      "climatology_years": 53,
+      "single_ratio": 13.952776772270116,
+      "temperature_ratios": 5.482585768493454,
+      "fixed_10_to_1": 17.447482283464566,
+      "estimate_inches": 13.952776772270116
+    },
+    {
+      "month": "2024-01",
+      "season": 2023,
+      "hours": 744,
+      "split": "test",
+      "observed_inches": 72.0,
+      "cold_swe_mm": 80.449375,
+      "warm_swe_mm": 42.145858000000004,
+      "climatology_inches": 68.52830188679245,
+      "climatology_years": 53,
+      "single_ratio": 38.59826174395451,
+      "temperature_ratios": 34.00556714146101,
+      "fixed_10_to_1": 48.26583976377953,
+      "estimate_inches": 38.59826174395451
+    },
+    {
+      "month": "2024-02",
+      "season": 2023,
+      "hours": 696,
+      "split": "test",
+      "observed_inches": 133.0,
+      "cold_swe_mm": 149.614093,
+      "warm_swe_mm": 217.979747,
+      "climatology_inches": 68.94528301886793,
+      "climatology_years": 53,
+      "single_ratio": 115.7343797518239,
+      "temperature_ratios": 79.25931286488618,
+      "fixed_10_to_1": 144.7219842519685,
+      "estimate_inches": 115.7343797518239
+    },
+    {
+      "month": "2024-03",
+      "season": 2023,
+      "hours": 743,
+      "split": "test",
+      "observed_inches": 95.0,
+      "cold_swe_mm": 279.40801,
+      "warm_swe_mm": 60.798352,
+      "climatology_inches": 61.298113207547175,
+      "climatology_years": 53,
+      "single_ratio": 107.11162160305642,
+      "temperature_ratios": 108.2849234430056,
+      "fixed_10_to_1": 133.9395125984252,
+      "estimate_inches": 107.11162160305642
+    },
+    {
+      "month": "2024-04",
+      "season": 2023,
+      "hours": 720,
+      "split": "test",
+      "observed_inches": 31.0,
+      "cold_swe_mm": 57.505886000000004,
+      "warm_swe_mm": 3.0813829999999998,
+      "climatology_inches": 33.48867924528302,
+      "climatology_years": 53,
+      "single_ratio": 19.075482871453744,
+      "temperature_ratios": 21.204250349264612,
+      "fixed_10_to_1": 23.85325551181103,
+      "estimate_inches": 19.075482871453744
+    },
+    {
+      "month": "2024-11",
+      "season": 2024,
+      "hours": 721,
+      "split": "test",
+      "observed_inches": 62.0,
+      "cold_swe_mm": 34.024,
+      "warm_swe_mm": 164.23600000000002,
+      "climatology_inches": 28.298113207547168,
+      "climatology_years": 53,
+      "single_ratio": 62.42079064653697,
+      "temperature_ratios": 31.181522864166773,
+      "fixed_10_to_1": 78.05511811023624,
+      "estimate_inches": 62.42079064653697
+    },
+    {
+      "month": "2024-12",
+      "season": 2024,
+      "hours": 744,
+      "split": "test",
+      "observed_inches": 39.0,
+      "cold_swe_mm": 29.7802,
+      "warm_swe_mm": 55.45380000000001,
+      "climatology_inches": 66.02264150943395,
+      "climatology_years": 53,
+      "single_ratio": 26.835335771042732,
+      "temperature_ratios": 17.160760563922118,
+      "fixed_10_to_1": 33.55669291338583,
+      "estimate_inches": 26.835335771042732
+    },
+    {
+      "month": "2025-01",
+      "season": 2024,
+      "hours": 744,
+      "split": "test",
+      "observed_inches": 10.0,
+      "cold_swe_mm": 27.6916,
+      "warm_swe_mm": 12.6887,
+      "climatology_inches": 68.52830188679245,
+      "climatology_years": 53,
+      "single_ratio": 12.713458350370004,
+      "temperature_ratios": 11.49645926936105,
+      "fixed_10_to_1": 15.897755905511811,
+      "estimate_inches": 12.713458350370004
+    },
+    {
+      "month": "2025-02",
+      "season": 2024,
+      "hours": 672,
+      "split": "test",
+      "observed_inches": 74.0,
+      "cold_swe_mm": 92.3977,
+      "warm_swe_mm": 185.47070000000002,
+      "climatology_inches": 68.94528301886793,
+      "climatology_years": 53,
+      "single_ratio": 87.48494514116915,
+      "temperature_ratios": 54.78340004660134,
+      "fixed_10_to_1": 109.39700787401576,
+      "estimate_inches": 87.48494514116915
+    },
+    {
+      "month": "2025-03",
+      "season": 2024,
+      "hours": 743,
+      "split": "test",
+      "observed_inches": 76.0,
+      "cold_swe_mm": 168.9829,
+      "warm_swe_mm": 52.6189,
+      "climatology_inches": 61.298113207547175,
+      "climatology_years": 53,
+      "single_ratio": 69.76979504032964,
+      "temperature_ratios": 67.30806920708552,
+      "fixed_10_to_1": 87.24480314960631,
+      "estimate_inches": 69.76979504032964
+    },
+    {
+      "month": "2025-04",
+      "season": 2024,
+      "hours": 720,
+      "split": "test",
+      "observed_inches": 19.0,
+      "cold_swe_mm": 26.7446,
+      "warm_swe_mm": 7.151999999999999,
+      "climatology_inches": 33.48867924528302,
+      "climatology_years": 53,
+      "single_ratio": 10.672110220061558,
+      "temperature_ratios": 10.517793412842602,
+      "fixed_10_to_1": 13.34511811023622,
+      "estimate_inches": 10.672110220061558
+    }
+  ],
+  "trained_seasons": [
+    "2020/21",
+    "2021/22"
+  ],
+  "validation_season": "2022/23",
+  "test_seasons": [
+    "2023/24",
+    "2024/25"
+  ],
+  "timing": "Hourly timing follows issued HRRR snowfall water near Main Lodge. Main Lodge validation is monthly.",
+  "methodology": "Only complete Pacific calendar months, including clock changes. Each hour uses the newest archived HRRR run available at its start, with a three-hour release allowance. Snow ratios are constrained nonnegative; a fixed 10:1 ratio can win validation. Climatology uses the resort archive through 2021/22.",
+  "caveat": "Depth is a proxy estimated from forecast snow water at a different elevation. No hourly Main Lodge fresh-snow depth accuracy or interval has been established.",
+  "resort_url": "https://www.mammothmountain.com/on-the-mountain/snowfall-history",
+  "generated_at": "2026-11-24T19:12:08.555998+00:00"
+}

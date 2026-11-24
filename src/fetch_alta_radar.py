@@ -50,7 +50,9 @@ def signed_grib(b):
     return -(n & (sign - 1)) if n & sign else n
 
 
-def decode_crop(payload: bytes, native_size=256, pool=2):
+def decode_crop(payload: bytes, native_size=256, pool=2, *, point=None, center=None):
+    point_lat, point_lon = (LAT, LON) if point is None else point
+    center_lat, center_lon = (REGION_LAT, REGION_LON) if center is None else center
     raw = gzip.decompress(payload) if payload[:2] == b"\x1f\x8b" else payload
     if raw[:4] != b"GRIB" or raw[7] != 2 or raw[-4:] != b"7777":
         raise ValueError("Not a complete GRIB2 message")
@@ -77,13 +79,15 @@ def decode_crop(payload: bytes, native_size=256, pool=2):
     lat0 = signed_grib(s3[46:50]) * unit
     lon0 = signed_grib(s3[50:54]) * unit
     dx, dy = uint(s3[63:67]) * unit, uint(s3[67:71]) * unit
-    r = round((lat0 - REGION_LAT) / dy)
-    c = round(((REGION_LON % 360) - lon0) / dx)
-    station_r = round((lat0-LAT)/dy)
-    station_c = round(((LON % 360)-lon0)/dx)
+    r = round((lat0 - center_lat) / dy)
+    c = round(((center_lon % 360) - lon0) / dx)
+    station_r = round((lat0-point_lat)/dy)
+    station_c = round(((point_lon % 360)-lon0)/dx)
     r0, c0 = r - native_size // 2, c - native_size // 2
     if native_size % pool or min(r0, c0) < 0 or r0+native_size>ny or c0+native_size>nx:
         raise ValueError("Invalid crop bounds or pooling")
+    if not (r0 <= station_r < r0 + native_size and c0 <= station_c < c0 + native_size):
+        raise ValueError("Radar point outside crop")
     pic = Image.open(io.BytesIO(sections[7][5:]))
     if pic.size != (nx, ny):
         raise ValueError("PNG and GRIB grid differ")
@@ -108,9 +112,11 @@ def decode_crop(payload: bytes, native_size=256, pool=2):
         "crop_native_shape": [native_size, native_size], "pool": pool,
         "reference": reference, "binary_scale": binary, "decimal_scale": decimal,
         "packing_template": 41, "grid_template": 0,
+        "grib2_product": [raw[6], sections[4][9], sections[4][10]],
+        "point_native_value": float(values[station_r-r0, station_c-c0]),
         "alta_native_value": float(values[station_r-r0, station_c-c0]),
         "point_extraction_version": 2,
-        "station_latitude": LAT, "station_longitude": LON,
+        "station_latitude": point_lat, "station_longitude": point_lon,
         "station_native_row": station_r, "station_native_column": station_c,
         "station_native_latitude": lat0-station_r*dy,
         "station_native_longitude": (lon0+station_c*dx+180)%360-180,

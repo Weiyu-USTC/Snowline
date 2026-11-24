@@ -24,7 +24,7 @@ trap 'rm -rf "$build_dir"' EXIT
 mkdir -p "$app_path/Contents/MacOS" "$app_path/Contents/Resources" "$build_dir/modules"
 xcrun swiftc -swift-version 5 -parse-as-library -O -target "$build_arch-apple-macosx13.0" \
   -module-cache-path "$build_dir/modules" \
-  -framework AppKit -framework SwiftUI -framework Network SnowlineWidget.swift HourlyAutoUpdater.swift HourlyRefreshPolicy.swift \
+  -framework AppKit -framework SwiftUI -framework Network SnowlineWidget.swift SnowfallOutlook.swift HourlyAutoUpdater.swift HourlyRefreshPolicy.swift \
   -o "$app_path/Contents/MacOS/SnowlineWidget"
 "$python_path" - "$app_path" "$project_root" "$python_path" <<'PY'
 import plistlib,sys

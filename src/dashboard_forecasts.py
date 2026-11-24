@@ -29,6 +29,7 @@ from threadpoolctl import threadpool_limits
 
 import build_mos_features as mos
 import nwp_benchmark as nwp
+from snowline_sites import SITES
 
 ROOT = Path(__file__).resolve().parents[1]
 CACHE = ROOT / 'data/dashboard/current'
@@ -36,12 +37,6 @@ MODEL_NAME = '+ wind forecasts'
 MODEL_LABEL = 'Current daily model · GFS MOS + calendar + ENSO'
 OPEN_METEO = 'https://api.open-meteo.com/v1/forecast'
 IEM = 'https://mesonet.agron.iastate.edu/cgi-bin/request/mos.py'
-SITES = {
-    'alta': dict(id='alta', name='Alta', location='Utah', target_label='Alta–Collins manual fresh snowfall', timezone='America/Denver', latitude=40.57607, longitude=-111.63889, elevation_m=2945, target_note='Manual station target, not a resort-wide average.'),
-    'vail': dict(id='vail', name='Vail', location='Colorado', target_label='Vail CAVMM snow sensor proxy', timezone='America/Denver', latitude=39.6176, longitude=-106.38, elevation_m=3140, target_note='Reported Sno24 sensor proxy; fresh-snow equivalence and reset protocol are not verified.'),
-    'mansfield': dict(id='mansfield', name='Stowe', location='Vermont · Stowe area', target_label='NOAA Mount Mansfield station', timezone='America/New_York', latitude=44.5247, longitude=-72.8153, elevation_m=1204, target_note='NOAA station snowfall; not a Stowe resort-wide total. Historical reporting times are uncertain.'),
-    'jay': dict(id='jay', name='Jay Peak', location='Vermont', target_label='NOAA Jay Peak station · 561 m', timezone='America/New_York', latitude=44.9381, longitude=-72.5022, elevation_m=560.8, target_note='Lower-elevation NOAA station target, not Jay Peak summit snowfall. Historical reporting times are uncertain.'),
-}
 LOCKS = {site: threading.Lock() for site in SITES}
 MOS_DOWNLOAD_LOCK = threading.Lock()
 LAST_MOS_DOWNLOAD = 0.
@@ -67,8 +62,8 @@ def list_mountains():
 
 
 def _capabilities(site):
-    return {'max_hours': 48, 'hourly_weather': True, 'daily_snow_model': True,
-            'powder_window_hours': 24, 'radar_nowcast': site == 'alta',
+    return {'max_hours': 48, 'hourly_weather': True, 'daily_snow_model': site != 'mammoth',
+            'powder_window_hours': 24 if site != 'mammoth' else None, 'hourly_snow_water_model': site == 'mammoth', 'radar_observation': site == 'mammoth', 'radar_nowcast': site == 'alta',
             'radar_max_hours': 3 if site == 'alta' else 0, 'refresh_online': True,
             'refresh_retrains_model': False, 'hourly_snow_validated': False}
 
@@ -276,6 +271,11 @@ def _fetch_daily(site, now):
 
 def _saved_snapshot(site, now):
     """Graceful, visibly dated initial display; no implicit network calls."""
+    if site == 'mammoth':
+        source = {'name': 'Open-Meteo hourly weather guidance', 'url': OPEN_METEO,
+                  'issued_at': None, 'retrieved_at': None, 'status': 'unavailable'}
+        return _payload(site, [], [], source, None, now, 'unavailable',
+                        ['Use Refresh all to download the Main Lodge forecast.'])
     warnings = ['Saved research snapshot. Use Refresh latest data for a new forecast.']
     hourly, daily = [], []
     source = {'name': 'Saved JMA forecast snapshot via Open-Meteo', 'issued_at': '2026-11-04T00:00:00+00:00',
@@ -324,14 +324,15 @@ def _evaluation(site):
 
 
 def _payload(site, hourly, daily, source, daily_source, now, status, warnings):
+    model_notes = [] if site == 'mammoth' else [
+        'Hourly snowfall is weather-provider guidance; daily snow and ≥5-inch powder probabilities come from our separate station model.',
+        'Daily forecasts use complete station reporting periods, not arbitrary rolling 24-hour windows. Prediction intervals have not been prospectively calibrated.']
     return {'schema_version': 1, 'site': copy.deepcopy(SITES[site]), 'generated_at': now.isoformat(),
             'source': source, 'daily_source': daily_source, 'status': status,
             'forecast_start': hourly[0]['start'] if hourly else None, 'forecast_end': hourly[-1]['time'] if hourly else None,
             'hourly': hourly, 'daily': daily, 'capabilities': _capabilities(site), 'evaluation': _evaluation(site),
             'warnings': list(dict.fromkeys(warnings + [SITES[site]['target_note'],
-                'Hourly snowfall is weather-provider guidance; daily snow and ≥5-inch powder probabilities come from our separate station model.',
-                'Daily forecasts use complete station reporting periods, not arbitrary rolling 24-hour windows. Prediction intervals have not been prospectively calibrated.',
-                'Hours 1–48 start at the next whole UTC hour; precipitation timestamps mark the end of each one-hour interval.']))}
+                'Hours 1–48 start at the next whole UTC hour; precipitation timestamps mark the end of each one-hour interval.'] + model_notes))}
 
 
 def _serve(result, now, cached):
@@ -384,7 +385,7 @@ def get_forecast(site, refresh=False):
         warnings, errors = [], []
         with ThreadPoolExecutor(max_workers=2) as pool:
             hourly_task = pool.submit(_fetch_hourly, site, now)
-            daily_task = pool.submit(_fetch_daily, site, now)
+            daily_task = pool.submit(_fetch_daily, site, now) if _capabilities(site)['daily_snow_model'] else None
             try:
                 hourly, source, _ = hourly_task.result()
             except Exception as exc:
@@ -394,7 +395,7 @@ def get_forecast(site, refresh=False):
                 source['status'] = 'cached' if hourly else 'unavailable'
                 warnings.append('Hourly refresh failed; retained forecast is dated and has not been refreshed.')
             try:
-                daily, daily_source = daily_task.result()
+                daily, daily_source = daily_task.result() if daily_task is not None else ([], None)
             except Exception as exc:
                 errors.append('Daily model refresh failed: '+str(exc))
                 daily = [r for r in (old or {}).get('daily', []) if _utc(r['start']) >= now]
@@ -408,12 +409,13 @@ def get_forecast(site, refresh=False):
         result = _payload(site, hourly, daily, source, daily_source, now, status, warnings+errors)
         result['errors'] = errors
         result['last_refresh_attempt_at'] = now.isoformat()
-        if len(errors) == 2 and old:
+        all_failed = len(errors) == (2 if daily_task is not None else 1)
+        if all_failed and old:
             result['generated_at'] = old['generated_at']
         result = _serve(result, now, cached=False)
         if not result['hourly'] and not result['daily']: result['status'] = 'unavailable'
-        # Both failed acquisitions must not replace a usable original snapshot.
-        if len(errors) < 2 and result['status'] != 'unavailable': _atomic_json(path, result)
+        # Keep the original snapshot when every attempted source failed.
+        if not all_failed and result['status'] != 'unavailable': _atomic_json(path, result)
         return result
 
 

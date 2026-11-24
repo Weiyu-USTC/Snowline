@@ -14,6 +14,7 @@ import io
 import json
 from pathlib import Path
 import re
+import tempfile
 import time
 
 import numpy as np
@@ -158,7 +159,9 @@ def parse_alta_file(p):
     if not match:
         return pd.DataFrame()
     latest = pd.to_datetime(match.group(2), utc=True)
-    table = next(t for t in soup.find_all('table') if 'Time (GMT)' in t.get_text(' ', strip=True))
+    table = next((t for t in soup.find_all('table') if 'Time (GMT)' in t.get_text(' ', strip=True)), None)
+    if table is None:
+        return pd.DataFrame()
     rows = table.find_all('tr')
     headers = [n.get_text(' ', strip=True) for n in rows[0].find_all(['th', 'td'])]
     records = []
@@ -271,6 +274,46 @@ def fetch_alta_history(workers=3):
     (RAW/'alta_cln_current.html').write_text(r.text)
 
 
+def fetch_current_collins(timeout):
+    from alta_collins_fallback import fetch_collins_fallback
+
+    path = RAW / 'alta_cln_current.html'
+    url = 'https://mesowest.utah.edu/cgi-bin/droman/meso_table_mesodyn.cgi'
+    params = dict(stn='CLN', unit=0, time='GMT', hours=24, order=1)
+    try:
+        response = requests.get(url, params=params, timeout=min(timeout, 10))
+        response.raise_for_status()
+        if 'stn=CLN' not in response.text:
+            raise ValueError('The response does not identify the Collins station.')
+        # Validate the download before replacing the last good station table.
+        with tempfile.NamedTemporaryFile(dir=RAW, suffix='.html', delete=False) as tmp:
+            candidate = Path(tmp.name)
+        try:
+            candidate.write_bytes(response.content)
+            frame = parse_alta_file(candidate)
+            if frame.empty:
+                raise ValueError('The station table contains no hourly observations.')
+            now = pd.Timestamp.now(tz='UTC')
+            frame = frame.loc[frame.valid_time_utc <= now].copy()
+            latest = frame.loc[frame.temperature_c.notna(), 'valid_time_utc'].max()
+            if pd.isna(latest) or now - latest > pd.Timedelta(hours=3):
+                raise ValueError('No valid Collins temperature in the last three hours.')
+            candidate.replace(path)
+        finally:
+            candidate.unlink(missing_ok=True)
+        frame['source_file'] = str(path.relative_to(ROOT))
+        frame.attrs['feed'] = 'MesoWest'
+        return frame
+    except (requests.RequestException, ValueError) as primary_error:
+        try:
+            frame = fetch_collins_fallback(RAW, timeout=timeout)
+        except (requests.RequestException, ValueError, OSError) as fallback_error:
+            raise ValueError(f'Collins observations unavailable. MesoWest: {primary_error}. '
+                             f'Alta: {fallback_error}') from fallback_error
+        frame.attrs.update(feed='Alta Ski Area', primary_error=str(primary_error))
+        return frame
+
+
 def fetch_current_observations(station_id, timeout=30):
     """Bounded, credential-free current weather fetch; no historical download.
 
@@ -289,11 +332,7 @@ def fetch_current_observations(station_id, timeout=30):
         r=requests.get(FEMC_PAGE,timeout=timeout);r.raise_for_status();p.write_bytes(r.content)
         result=parse_femc(include_archive=False)
     elif station_id=='CLN':
-        p=RAW/'alta_cln_current.html'
-        r=requests.get('https://mesowest.utah.edu/cgi-bin/droman/meso_table_mesodyn.cgi',
-            params=dict(stn='CLN',unit=0,time='GMT',hours=24,order=1),timeout=timeout)
-        r.raise_for_status();p.write_bytes(r.content)
-        result=parse_alta_file(p)
+        result=fetch_current_collins(timeout)
     else:
         raise ValueError(f'No verified mountain source for {station_id}')
     result['retrieved_utc']=pd.Timestamp.now(tz='UTC')

@@ -1,3 +1,5 @@
 -r requirements.txt
 # Optional historical TabPFN benchmark; not needed by the app or runtime bundle.
 tabpfn==9.2.0
+# Optional Mammoth disdrometer archive reader.
+h5py==3.16.0

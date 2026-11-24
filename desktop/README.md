@@ -1,7 +1,7 @@
 # Snowline Mac widget
 
 The floating widget is a native SwiftUI/AppKit client for the local Snowline
-forecast service. It supports Alta, Vail, Stowe, and Jay Peak, horizons from
+forecast service. It supports Alta, Vail, Stowe, Jay Peak, and Mammoth Mountain, horizons from
 1 to 48 hours, US/metric units, and a button opening the full dashboard.
 
 ## Setup
@@ -44,7 +44,7 @@ Documents avoids requiring access to that protected folder.
 
 Click the floating mountain icon to expand or collapse the panel. Drag the
 icon to move it. Choose a mountain and horizon, then select **Refresh all**
-to update all four mountains. The app downloads new public inputs and runs
+to update all five mountains. Mammoth compares modeled snow water with HRRR and ECMWF guidance and displays a separate Main Lodge fresh-snow estimate. The app downloads new public inputs and runs
 the saved models; it does not retrain them. **Our model** denotes the
 selected model or its documented fallback for the requested horizon.
 
